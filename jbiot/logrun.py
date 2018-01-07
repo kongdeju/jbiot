@@ -1,40 +1,32 @@
 import os
 
-def logrun(cmd,info="cmd info",prefix="run",run=False,docker=False):
+class log:
 
-    cmdfile = prefix + ".cmd"
-    logfile = prefix + ".log"
-    fp = open(cmdfile,"a")
+    @staticmethod
+    def run(cmd,prefix="run",run=False,docker=False):
 
-    cmdtitle = "### %s\n" % info
-    cmd = "    %s 1>>%s 2>>%s " % (cmd,logfile,logfile)
-    print
-    print cmdtitle
-    print cmd
-    print
-    fp.write("\n")
-    fp.write(cmdtitle)
-    line = cmd + "\n\n"
-    fp.write(line)
+        cmdfile = prefix + ".cmd"
+        fp = open(cmdfile,"a")
+        cmd = "    %s" % (cmd)
+        line = cmd + "\n"
+        fp.write(line)
 
-    fp.close()
+        fp.close()
+        if run:
+            os.system(cmd)
+        if docker:
+            pass
 
-    if run:
-
-        os.system(cmd)
-
-
-def test_logrun():
-
-    cmd = "bwa mem "
+    @staticmethod
+    def info(info,prefix,para=1):
+        md = "#"*3
+        cmdfile = prefix + ".cmd"
+        fp = open(cmdfile,"a")
+        fp.write("\n\n")    
+        line = "%s  %s --parallize %s\n\n" % (md,info,para)
+        fp.write(line)
     
-    logrun(cmd)
+        fp.close()
 
-
-if __name__ == "__main__":
-    test_logrun()
-
-    
-    
 
     

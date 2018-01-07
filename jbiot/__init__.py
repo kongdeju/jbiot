@@ -6,8 +6,6 @@ try:
 except:
     __version__ = 'unknown'
 
-from subjobs.splitcmd import *
-from subjobs.lsub import *
-from subjobs.csub import *
+from logrun import *
 
 

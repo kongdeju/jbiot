@@ -1,4 +1,0 @@
-
-def pair():
-
-    pass

@@ -1,6 +1,23 @@
+from docopt import docopt
+
+usage = """
+
+
+    Usage:
+      naval_fate.py <cmdfile> [-j <num>]
+      naval_fate.py --version
+
+    Options:
+      -h --help                   Show this screen.
+      --version                   Show version.
+      -j=<K> --parallel=<K>       threads [default: 1]
+
+
+        """
 
 def lsub(stepfile,threads=1):
-    
+   
+    threads = int(threads) 
     fp = open(stepfile)
     
     cmds =  []
@@ -26,3 +43,12 @@ def lsub(stepfile,threads=1):
     line = "wait\n"
     fp.write(line)
     fp.close()
+
+
+if __name__ == "__main__":
+
+    args = docopt(usage)
+
+    cmdfile = args["<cmdfile>"]
+    threads = args["--parallel"] 
+    lsub(cmdfile,threads)
