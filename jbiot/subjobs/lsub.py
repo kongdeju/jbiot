@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from docopt import docopt
 
 usage = """
@@ -25,6 +26,8 @@ def lsub(stepfile,threads=1):
         line = line.strip()
         if not line :
             continue
+        if line.startswith("#"):
+            continue
         cmds.append(line)
 
     prex = stepfile.split("/")[-1].split(".")[0]
@@ -34,13 +37,18 @@ def lsub(stepfile,threads=1):
     for i in range(len(cmds)):
         cmd = cmds[i]
         cmdlog = prex + ".%s.log" % i
-        cmd = "nohup %s 1>>%s 2>>%s & \n" % (cmd,cmdlog,cmdlog)
+        cmdecho = '''echo "%s" ''' % cmd
+        cmdecho = cmdecho + "\n"
+        if cmd.strip().startswith("for "):
+            cmd = cmd + "\n"
+        else:
+            cmd = "echo %s 1>>%s 2>>%s;nohup %s 1>>%s 2>>%s & \n" % (cmd,cmdlog,cmdlog,cmd,cmdlog,cmdlog)
+        fp.write(cmdecho)
         fp.write(cmd)
         j =  i + 1
         if j % threads == 0:
             line = "wait\n"
             fp.write(line)
-    line = "wait\n"
     fp.write(line)
     fp.close()
 

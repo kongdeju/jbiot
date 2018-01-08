@@ -36,7 +36,6 @@ def splitcmd(cmdfile):
     return stepsfile
 
 
-
     
 def main(args):
     pass

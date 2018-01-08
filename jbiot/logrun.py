@@ -7,7 +7,8 @@ class log:
 
         cmdfile = prefix + ".cmd"
         fp = open(cmdfile,"a")
-        cmd = "    %s" % (cmd)
+        #cmd = '''    echo  "%s" ;%s''' % (cmd,cmd)
+        cmd = "    %s" % cmd
         line = cmd + "\n"
         fp.write(line)
 
