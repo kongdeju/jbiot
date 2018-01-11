@@ -1,33 +1,34 @@
+#!/usr/bin/env python
+from cmdStep import cmdStep
+from msub import msub
 
-def csub(stepfile,mem="2G"):
+import os
+
+def csub(cmd):
     
-    fp = open(stepfile)
+    cmdfiles = cmdStep(cmd)
+    cmdparas = []
+    for cmdfile in cmdfiles:
+        msub(cmdfile)
+      
+
+if __name__ == "__main__":
     
-    cmds =  []
-    for line in fp.readlines():
-        line = line.strip()
-        if not line :
-            continue
-        if line.startswith("#"):
-            continue
-        cmds.append(line)
+    from docopt import docopt
 
-    prex = stepfile.split("/")[-1].split(".")[0]
+    usage = """
+    Usage:
+        csub.py <cmdfile>
 
-    for i in range(len(cmds)):
-        qjob = prex + ".%s.qsub" % i
-        cmd = cmds[i]
-        line = """#!/bin/bash 
-#$ -S /bin/bash
-#$ -cwd
-#$ -l vf=%s
-date
-%s
-date
-        """ % (mem,cmd)
-        fp = open(qjob,"w")
-        fp.write(line)
-        fp.close()
+    Options:
+        -h --help        print this screen
+    """
+    args = docopt(usage) 
+    cmdfile = args["<cmdfile>"]
+    csub(cmdfile)
 
+   
 
+    
+    
 
