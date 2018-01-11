@@ -19,12 +19,12 @@ class log:
             pass
 
     @staticmethod
-    def info(info,prefix,para=1):
+    def info(info,prefix,para=1,mem="2G"):
         md = "#"*3
         cmdfile = prefix + ".cmd"
         fp = open(cmdfile,"a")
         fp.write("\n\n")    
-        line = "%s  %s --parallize %s\n\n" % (md,info,para)
+        line = "%s  %s --para=%s --mem=%s\n\n" % (md,info,para,mem)
         fp.write(line)
     
         fp.close()
