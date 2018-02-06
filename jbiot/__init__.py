@@ -6,6 +6,7 @@ try:
 except:
     __version__ = 'unknown'
 
-from logrun import *
+from logrun2 import *
+from arrange import arrange
 
 

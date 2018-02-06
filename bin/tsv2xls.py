@@ -18,10 +18,20 @@ def tsv2xls(tsv):
 
     workbook.save(xlsfile)
 
-
+    return xlsfile
 
 if __name__ == "__main__":
-    import sys
-    tsv2xls(sys.argv[1])
-    
+    from docopt import docopt
+    usage = """
+    Usage:
+        tsv2xls.py <tsv>
         
+    Options:
+        -h --help  print this screen
+        <tsv>      file seperated by tab
+
+    """
+    args = docopt(usage)
+    tsv = args["<tsv>"]
+    tsv2xls(tsv)
+    
