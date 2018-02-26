@@ -20,8 +20,8 @@ def setup_package():
     sphinx = ['sphinx'] if needs_sphinx else []
     setup(setup_requires=['six', 'pyscaffold>=2.5a0,<2.6a0'] + sphinx,
           use_pyscaffold=True,
-        "install_requires":readfile("requirements.txt"),
-        "scripts":["bin/xls2tsv.py","bin/tsv2xls.py","bin/md2html.py","bin/lsub.py"]
+        install_requires=readfile("requirements.txt"),
+        scripts=["bin/xls2tsv.py","bin/tsv2xls.py","bin/md2html.py","bin/lsub.py"]
         )
 
 
