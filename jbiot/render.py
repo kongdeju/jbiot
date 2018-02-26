@@ -9,7 +9,6 @@ import xlrd
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
 dirpath = os.path.dirname(os.path.abspath(__file__))
 macro = os.path.join(dirpath,"func.macro")
 
@@ -32,8 +31,6 @@ def render(tpl,ijson,out):
     fp.close()
 
     return tmd 
-
-
 
 if __name__ == "__main__":
     import sys
