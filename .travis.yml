@@ -1,0 +1,10 @@
+language: python
+python:
+    - "2.7"
+
+install:
+    - pip intall -r requirements.txt
+
+script:
+    - cd tests
+    - pytest
