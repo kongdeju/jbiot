@@ -8,13 +8,13 @@ import yaml
 usage = """
 
 Usage:
-  smartFq.py -d <dir> [-o <json>] [-f <fmt>]
+  smartFq.py -d <dir> [-o <json>] [-f <fmt>] [--rel]
 
 Options:
   -d <dir> --dir <dir>        fastq directory,prefer absolute path 
-  -o <json> --out <json>      output json file default: stdout
+  -o <json> --out <json>      output json file 
   -f <yaml> --yaml <yaml>     output yaml
-
+  --rel                       use relative path [default: False]
         """
 
 def testFq(fq):
@@ -27,13 +27,15 @@ def testFq(fq):
         return 1
     
 
-def smartFqs(indir,out,yml):
+def smartFqs(indir,out,yml,rel):
     fqs = []
     pair = {}
     curdir = os.getcwd() 
     for root,dirs,files in os.walk(indir):
         for file in sorted(files):
             absfile = os.path.join(curdir,root,file)
+            if rel:
+                absfile = os.path.join(root,file)
             if file.find("fq") != -1 or file.find("fastq") != -1 and testFq(absfile) :
                 # smart fq
                 #absfile = os.path.join(root,file)
@@ -90,5 +92,6 @@ if __name__ == "__main__":
     indir = args["--dir"]
     prex = args["--out"]
     fmt  = args["--yaml"]
-    smartFqs(indir,prex,fmt)
+    rel = args["--rel"]
+    smartFqs(indir,prex,fmt,rel)
 
