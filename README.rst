@@ -8,11 +8,9 @@ jbiot
 .. image:: https://readthedocs.org/projects/jbiot/badge/?version=latest
        :target: http://jbiot.readthedocs.io/en/latest/?badge=latest
 .. image:: https://img.shields.io/github/tag/ngsqc/jbiot.svg
-       :target https://github.com/kongdeju/jbiot
+       :target: https://github.com/kongdeju/jbiot
 .. image:: https://img.shields.io/github/downloads/jbiot/jbiot/total.svg
-       :target https://github.com/kongdeju/jbiot
-.. image:: https://img.shields.io/npm/l/express.svg?registry_uri=https%3A%2F%2Fregistry.npmjs.com
-       :target https://github.com/kongdeju/jbiot
+       :target: https://github.com/kongdeju/jbiot
 
 Add a short description here!
 
