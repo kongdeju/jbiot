@@ -1,13 +1,21 @@
 #!/usr/bin/env python
 import os
 
-mkdoctmplate = "/lustre/users/kongdeju/mkdocsTemplate"
+dirpath = os.path.dirname(os.path.abspath(__file__))
+mkdoctemplate = os.path.join(dirpath,"mkdocsTemplate.tgz")
 mkdocs = "mkdocs"
 
 def md2html(md):
     curdir = os.getcwd()
 
-    cmd = "cp -r %s mkdocFiles" % mkdoctmplate
+    cmd = "tar xvzf %s" % mkdoctemplate
+    os.system(cmd)
+
+    
+    cmd = "cp -r %s mkdocFiles" % "mkdocsTemplate"
+    os.system(cmd)
+
+    cmd = "rm -rf mkdocsTemplate"
     os.system(cmd)
 
     cmd = "cp %s mkdocFiles/docs/index.md" % md
@@ -28,6 +36,10 @@ def md2html(md):
     cmd = "tar cvzf html.tgz html/"
     os.system(cmd)
 
+    cmd = "rm -rf html/"
+    os.system(cmd)
+
+    
 
 if __name__ == "__main__":
 

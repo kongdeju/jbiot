@@ -1,7 +1,11 @@
 {% macro add_xls(table) -%}
 {% set data = xlrd.open_workbook(table) %}
 {% set table = data.sheets()[0] %}
-{% for i in range(table.nrows) -%}
+{% set num = table.nrows%}
+{% if num > 10 %}
+    {% set num = 10 %}
+{% endif %}
+{% for i in range(num) -%}
 {% if i == 0 -%}
 {% for cell in table.row_values(i) -%}
         |{{ cell }}
