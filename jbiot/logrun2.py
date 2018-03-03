@@ -33,10 +33,10 @@ def dict2cmd(dic,cmdfile):
 class log:
 
     @staticmethod
-    def run(tag,cmd,para=1,mem="2G",docker=''):
+    def run(tag,cmd,para=1,mem="2G",docker='',singularity=''):
         cmdfile =  "run.cmd"
         cmdict = load2dict(cmdfile)
-        tag = "#### %s --para=%s --mem=%s --docker=%s" % (tag,para,mem,docker)
+        tag = "#### %s --para=%s --mem=%s --docker=%s --singularity=%s" % (tag,para,mem,docker,singularity)
         if tag in cmdict:
             cmdict[tag].append(cmd)
         else:
