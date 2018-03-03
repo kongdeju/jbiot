@@ -72,8 +72,8 @@ def smartFqs(indir,out,yml,rel):
         outdict[prex] = items
     
     outdict = {"fastqs":outdict,"groups":None}
-    jstr = json.dumps(outdict,indent=True)
-    ystr = yaml.dump(outdict)  
+    jstr = json.dumps(outdict)
+    ystr = yaml.dump(outdict,default_flow_style=False)  
     print ystr
     if out :
         fp = open(out,"w")

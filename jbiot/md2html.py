@@ -39,7 +39,6 @@ def md2html(md):
     cmd = "rm -rf html/"
     os.system(cmd)
 
-    
 
 if __name__ == "__main__":
 
@@ -58,5 +57,4 @@ if __name__ == "__main__":
 
     md = args["<md>"]
     md2html(md)
-
 
