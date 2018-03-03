@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 from collections import OrderedDict
+import os
+import logging
 
 def findDockerSingul(item):
     items = item.split()
@@ -10,8 +12,25 @@ def findDockerSingul(item):
             docker = item.split("=")[-1]
         if item.startswith("--singularity="):
             sing = item.split("=")[-1]
+    docker=docker.strip()
+    sing = sing.strip()
     return docker,sing
 
+def handleSing(simg):
+    sdir = "~/.singularity"
+    if not os.path.exists(sdir):
+        os.system("mkdir %s" % sdir)
+    simgPath = os.path.join(sdir,simg)
+    if os.path.exists(simgPath):
+        return simg
+    simghttp = "http://www.genescret.com:6636/singularity/%s" % simg
+    cmd = "wget -P %s %s" % (sdir,simghttp)
+    flag = os.system(cmd)
+    if flag == 0:
+        return simgPath
+    msg = "%s not found" % simg
+    logging.warning(msg)
+    return 
 
 def dockersing(cmdfile,prefer="docker"):
     fp = open(cmdfile)
@@ -37,12 +56,15 @@ def dockersing(cmdfile,prefer="docker"):
     afterDict = OrderedDict()
     for tag,cmds in cmddict.items():
         docker,sing = findDockerSingul(tag)
+        if sing:
+            sing = handleSing(sing)
         if not ( docker or sing ):
             afterDict[tag] = cmds
             continue
         
         vcmds = []
         for cmd in cmds:
+            vcmd = cmd
             rootDir = "/rootDir"
             cmdelements = cmd.split()
             for i in range(len(cmdelements)):
@@ -51,14 +73,19 @@ def dockersing(cmdfile,prefer="docker"):
                     element = rootDir + element
                     cmdelements[i] = element
             cmd = " ".join(cmdelements)
-            
+            dcmd = ""
+            scmd = ""
             if docker :
                 dcmd = "docker run --rm -v /:%s -v $PWD:$PWD -w $PWD %s %s" % (rootDir,docker,cmd)
             if sing:
-                scmd = "singularity exec -bind /:%s %s %s " % (rootDir,sing,cmd)
-            if prefer == "docker" and dcmd:
+                scmd = "singularity exec --bind /:%s %s %s " % (rootDir,sing,cmd)
+            if  dcmd and scmd and prefer=="docker":
                 vcmd = dcmd
-            if prefer == "singularity" and scmd:
+            if dcmd and scmd and prefer=="singularity":
+                vcmd = scmd
+            if dcmd and not scmd:
+                vcmd = dcmd
+            if scmd and not dcmd:
                 vcmd = scmd
        
             vcmds.append(vcmd)
@@ -84,7 +111,7 @@ if __name__ == "__main__":
 
     usage = """
     Usage:
-        dockersing.py <cmdfile> [--prefer=<tech>]
+        dockersing.py <cmdfile> [--prefer=<docker|singularity>]
 
     Options:
         -h,--help           will print this screen
