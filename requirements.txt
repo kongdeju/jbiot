@@ -8,3 +8,5 @@ xlrd
 xlwt
 docopt
 PyScaffold==2.5.0
+mkdocs
+
