@@ -17,7 +17,9 @@ def findDockerSingul(item):
     return docker,sing
 
 def handleSing(simg):
-    sdir = "~/.singularity"
+    #bug fixec
+    home = os.environ["HOME"]
+    sdir = os.path.join(home,".singularity")
     if not os.path.exists(sdir):
         os.system("mkdir %s" % sdir)
     simgPath = os.path.join(sdir,simg)

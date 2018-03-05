@@ -7,10 +7,15 @@ import os
 from jbiot import jbiotWorker
 
 def get_file(remotefile):
+    home = os.environ["HOME"]
     localfile = remotefile.split("/")[-1]
-    cmd = "wget %s -O %s" % (remotefile,localfile)
+    cmd = "wget %s -P ~/.report_templates " % (remotefile)
+    localpath = os.path.join(home,".report_templates",localfile)
+    if os.path.exists(localpath):
+        return localpath
     os.system(cmd)
-    return localfile
+    
+    return localpath
 
 def report(params):
     # get template
