@@ -27,15 +27,16 @@ def report(params):
     ijson = params["render_json"] 
     out = "{{projName}}.md"
     cmd = "%s -t %s -j %s -o %s" % (render,templ,ijson,out)
-    log.run("render mapping template",cmd)
+    log.run("render mapping {{projName}} template",cmd,docker="kongdeju/alpine-dev:stable")
+
+    cmd = "%s %s" % (md2html,out)
+    log.run("md2html {{projName}} report ",cmd,docker="kongdeju/alpine-dev:stable")
 
     outdict = {}
     outdict["report_md"] = out
     return outdict
 
-
 class reportWorker(jbiotWorker):
     def handle_task(self,key,params):
         self.execMyfunc(report,params)
-
 

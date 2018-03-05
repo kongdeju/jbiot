@@ -15,6 +15,8 @@ report = os.path.join(os.path.dirname(os.path.abspath(__file__)),"report.py")
 gitig = os.path.join(os.path.dirname(os.path.abspath(__file__)),"gitignore")
 config = os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.py")
 curdir = os.getcwd()
+lsubdocker = os.path.join(os.path.dirname(os.path.abspath(__file__)),"lsub_within_docker.py")
+maindocker = os.path.join(os.path.dirname(os.path.abspath(__file__)),"main_within_docker.py")
 
 def startup(proj):
     cmd = "putup %s " % proj
@@ -67,6 +69,16 @@ def startup(proj):
     cmd = "chmod +x %s/bin/%s.py" % (proj,proj)
     os.system(cmd)
 
+    mc = open(maindocker).read()
+    template = Template(mc)
+    md = template.render(projName=proj)
+    mdocker = "%s/bin/.%s_within_docker.py" % (proj,proj)
+    fp = open(mdocker,"w")
+    fp.write(md)
+    fp.close()
+
+    cmd = "cp %s %s/bin/.lsub_within_docker.py" % (lsubdocker,proj)
+    os.system(cmd)
     #5. proj/arranger
     arrdir =  "%s/%s/arranger" % (proj,proj)
     cmd = "mkdir -p %s" % arrdir
