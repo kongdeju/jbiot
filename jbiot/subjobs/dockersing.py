@@ -24,14 +24,14 @@ def handleSing(simg):
         os.system("mkdir %s" % sdir)
     simgPath = os.path.join(sdir,simg)
     if os.path.exists(simgPath):
-        return simg
-    # simghttp = "http://www.genescret.com:6636/singularity/%s" % simg
-    #cmd = "wget -P %s %s" % (sdir,simghttp)
-    #flag = os.system(cmd)
-    #if flag == 0:
-    #    return simgPath
-    #msg = "%s not found" % simg
-    #logging.warning(msg)
+        return simgPath
+    simghttp = "http://www.genescret.com:6636/singularity/%s" % simg
+    cmd = "wget -P %s %s" % (sdir,simghttp)
+    flag = os.system(cmd)
+    if flag == 0:
+        return simgPath
+    msg = "%s not found" % simg
+    logging.warning(msg)
     return 
 
 def dockersing(cmdfile,prefer="docker"):
