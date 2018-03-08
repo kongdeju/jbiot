@@ -5,6 +5,7 @@ import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
 from jbiot import csub
+
 if __name__ == "__main__":
     from docopt import docopt
 
@@ -21,5 +22,5 @@ if __name__ == "__main__":
     cmdfile = args["<cmdfile>"]
     docker = args["--with-docker"]
     sing = args["--with-singularity"]
-    csub(cmdfile,docker=docker,sing=sing)
+    csub.csub(cmdfile,docker=docker,sing=sing)
 
