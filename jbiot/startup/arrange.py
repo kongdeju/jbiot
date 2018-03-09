@@ -3,7 +3,6 @@ try:
 except:
     pass
 
-import json
 from jbiot import jbiotWorker
 
 def arrange(params):
@@ -15,21 +14,23 @@ def arrange(params):
     Returns:
         dict : 
     """
-    # params to outdict to json
+    # copy files to report
 
+
+
+    # output json file to report
     outdict = {}
     ystr = json.dumps(outdict)
-    oj = "args.json"
-    fp = open(oj,"w")
-    fp.write(ystr)
-    fp.close()
-
+    oj = "{{projName}}.json"
+    
+    cmd = "echo '%s' > %s " % (ystr,oj)
+    tag = "export {{projName}} to jsonfile"
+    log.run("tag",cmd)
     out = {}
     out["render_json"] = oj
     return out
 
-class qcArranger(jbiotWorker):
+class {{projName}}Arranger(jbiotWorker):
     def handle_task(self,key,params):
         self.execMyfunc(arrange,params)
-
 

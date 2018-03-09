@@ -9,19 +9,19 @@ setup = os.path.join(os.path.dirname(os.path.abspath(__file__)),"setup.py")
 setcfg = os.path.join(os.path.dirname(os.path.abspath(__file__)),"setup.cfg")
 travis = os.path.join(os.path.dirname(os.path.abspath(__file__)),".travis.yml")
 sphinx_conf = os.path.join(os.path.dirname(os.path.abspath(__file__)),"conf.py")
-main_ = os.path.join(os.path.dirname(os.path.abspath(__file__)),"bin.py")
 arrange = os.path.join(os.path.dirname(os.path.abspath(__file__)),"arrange.py")
 report = os.path.join(os.path.dirname(os.path.abspath(__file__)),"report.py")
 gitig = os.path.join(os.path.dirname(os.path.abspath(__file__)),"gitignore")
 config = os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.py")
 curdir = os.getcwd()
-lsubdocker = os.path.join(os.path.dirname(os.path.abspath(__file__)),"lsub_within_docker.py")
-maindocker = os.path.join(os.path.dirname(os.path.abspath(__file__)),"main_within_docker.py")
+
+maindocker = os.path.join(os.path.dirname(os.path.abspath(__file__)),"qc_report_within_docker.py")
+main_ = os.path.join(os.path.dirname(os.path.abspath(__file__)),"qc_report.py")
+raw = os.path.join(os.path.dirname(os.path.abspath(__file__)),"qc_report_without_docker.py")
 
 def startup(proj):
-    cmd = "putup %s " % proj
+    cmd = "putup -p %s %s " % (proj,proj)
     os.system(cmd) 
-
     # git ignore    
     mc = open(gitig).read()
     template =  Template(mc)
@@ -58,7 +58,7 @@ def startup(proj):
     cmd = "mkdir -p %s/bin" % proj
     os.system(cmd)
 
-    
+    # bin/project.py    
     mc = open(main_).read()
     template =  Template(mc)
     main = template.render(projName=proj)
@@ -69,22 +69,39 @@ def startup(proj):
     cmd = "chmod +x %s/bin/%s.py" % (proj,proj)
     os.system(cmd)
 
+    # main docker
     mc = open(maindocker).read()
     template = Template(mc)
     md = template.render(projName=proj)
-    mdocker = "%s/bin/.%s_within_docker.py" % (proj,proj)
+    mdocker = "%s/bin/%s_within_docker.py" % (proj,proj)
     fp = open(mdocker,"w")
     fp.write(md)
     fp.close()
-
-    cmd = "cp %s %s/bin/.lsub_within_docker.py" % (lsubdocker,proj)
+    cmd = "chmod +x %s" % mdocker
+    os.system(cmd)    
+    # main raw
+    mc = open(raw).read()
+    template = Template(mc)
+    md = template.render(projName=proj)
+    mdocker = "%s/bin/%s_without_docker.py" % (proj,proj)
+    fp = open(mdocker,"w")
+    fp.write(md)
+    fp.close()
+    cmd = "chmod +x %s" % mdocker
     os.system(cmd)
     #5. proj/arranger
     arrdir =  "%s/%s/arranger" % (proj,proj)
     cmd = "mkdir -p %s" % arrdir
     os.system(cmd)
-    cmd = "cp %s %s" % (arrange,arrdir)
-    os.system(cmd)
+
+    mc = open(arrange).read()
+    template = Template(mc)
+    md = template.render(projName=proj)
+    mdocker = "%s/%s/arranger/arrange.py" % (proj,proj)
+    fp = open(mdocker,"w")
+    fp.write(md)
+    fp.close()
+
     os.chdir(arrdir)
     os.system("touch __init__.py")
     os.system("ln -s ../config.py .")
@@ -102,7 +119,8 @@ def startup(proj):
     fp = open(mainpy,"w")
     fp.write(main)
     fp.close()
-    
+   
+ 
     os.chdir(repdir)
     os.system("touch __init__.py")
     os.system("ln -s ../config.py .")

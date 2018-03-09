@@ -5,24 +5,27 @@ except:
 from jbiot import log
 import os
 from jbiot import jbiotWorker
+from jbiot import log
 
 def get_file(remotefile):
     home = os.environ["HOME"]
     localfile = remotefile.split("/")[-1]
-    cmd = "wget %s -P ~/.report_templates " % (remotefile)
-    localpath = os.path.join(home,".report_templates",localfile)
-    if os.path.exists(localpath):
-        return localpath
-    os.system(cmd)
-    
-    return localpath
+    cmd = "wget %s -P %s/.templates " % (home,remotefile)
+
+    localfile = os.path.join(home,".templates",localfile)
+    if os.path.exists(localfile):
+        return localfile
+    tag = "get {{projName}} report templates"
+    log.run(tag,cmd)
+    if os.path.exists(localfile):
+        return localfile
+    return 
 
 def report(params):
     # get template
     templ = params["{{projName}}_template"]
     if templ.startswith("http://"):
         templ = get_file(templ)
-
 
     ijson = params["render_json"] 
     out = "{{projName}}.md"
