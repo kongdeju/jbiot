@@ -7,6 +7,8 @@ jbiot
        :target: https://pypi.python.org/pypi/jbiot
 .. image:: https://readthedocs.org/projects/jbiot/badge/?version=latest
        :target: http://jbiot.readthedocs.io/en/latest/?badge=latest
+.. image:: https://codecov.io/gh/kongdeju/jbiot/branch/master/graph/badge.svg
+     :target: https://codecov.io/gh/kongdeju/jbiot
 
 Add a short description here!
 
