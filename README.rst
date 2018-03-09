@@ -10,13 +10,16 @@ jbiot
 .. image:: https://codecov.io/gh/kongdeju/jbiot/branch/master/graph/badge.svg
      :target: https://codecov.io/gh/kongdeju/jbiot
 
-Add a short description here!
-
+jbiot J. bioinformatic devtoolkits
 
 Description
 ===========
 
-A longer description of your project goes here...
+jbiot is a toolkit contains :
+    
+    - job subjects 
+    - dev tools
+    - etc.
 
 
 Note
