@@ -4,9 +4,7 @@ jbiot
 
 This is the documentation of **jbiot**.
 
-.. note::
-
-    This jbiot python packages designed for bioinformatics develop toolkits
+This jbiot python packages designed for bioinformatics develop toolkits
 
 
 Contents
