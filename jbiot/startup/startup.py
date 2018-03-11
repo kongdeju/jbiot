@@ -47,9 +47,14 @@ def startup(proj):
     os.system(cmd) 
   
     #3. docs
-    cmd = "cp %s %s/docs" % (sphinx_conf,proj)
-    os.system(cmd)
-    
+    mc = open(sphinx_conf).read()
+    template =  Template(mc)
+    main = template.render(projName=proj)
+    mainpy = "%s/docs/conf.py" % (proj)
+    fp = open(mainpy,"w")
+    fp.write(main)
+    fp.close()
+
     # add config.py
     cmd = "cp %s %s/%s" % (config,proj,proj)
     os.system(cmd)
