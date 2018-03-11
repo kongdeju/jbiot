@@ -11,18 +11,21 @@ from jbiot.md2html import md2html
 if __name__ == "__main__":
 
     from docopt import docopt
-
     usage = """
     Usage:
-        md2html.py <md>
+        md2html.py <md> [ -s <style> ] 
+    
+    md2html.py is designed to transfer markdown file to html file 
+    using mkdocs to build this process.
 
     Options:
-       -h --help     just print this screen
-       mdfile        markdown format file
-       output        default is html directory. and also html.tgz
+       -h --help            just print this screen
+       <md>                 markdown format file
+       -s,--style=<style>    
+       output               default ouput html.tgz
     """
     args = docopt(usage)
-
     md = args["<md>"]
-    md2html(md)
+    style = args["--style"]
+    md2html(md,style)
 
