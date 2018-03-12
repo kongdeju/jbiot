@@ -6,6 +6,11 @@ This is the documentation of **jbiot**.
 
 This jbiot python packages designed for bioinformatics develop toolkits
 
+Installation
+============
+
+    pip intall jbiot
+
 
 Contents
 ========
