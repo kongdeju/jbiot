@@ -9,7 +9,7 @@ from multiprocessing import Process
 
 pat1 = re.compile("--mem[= ](\d+)")
 def csub(stepfile):
-    stepdir = ".steps" 
+    stepdir = "logs" 
     if not os.path.exists(stepdir):
         os.mkdir(stepdir)
  

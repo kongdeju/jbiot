@@ -27,7 +27,7 @@ def cmdStep(cmdfile):
             step2cmd[task].append(line)
     
     stepsfile = []
-    stepdir = ".steps"
+    stepdir = "logs"
     if not os.path.exists(stepdir):
         os.system("mkdir %s" % stepdir)
     for task in tasks:
