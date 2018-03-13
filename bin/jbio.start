@@ -6,5 +6,21 @@ import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
 from jbiot.jbio.jbio import *
+from threading import Thread
+import time
 
-listen(bot,token="devlab",receivers=[deju,grp])
+def run():
+    listen(bot,token="devlab",receivers=[deju,grp])
+
+def Run():
+    d = Thread(target=run)
+    d.start()
+    d.join(10000)
+    if d.isAlive():
+        d.terminate()
+        d.join()
+
+while True:
+    Run()
+    time.sleep(10)
+

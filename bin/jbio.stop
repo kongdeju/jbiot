@@ -1,0 +1,11 @@
+
+import os
+
+cmd = "ps aux | grep jbio.start | awk '{print $2} | xargs kill -9'"
+
+print cmd
+
+os.system(cmd)
+
+
+
