@@ -8,9 +8,21 @@ import base64
 import xlrd
 reload(sys)
 sys.setdefaultencoding('utf-8')
+from PIL import Image
 
 dirpath = os.path.dirname(os.path.abspath(__file__))
 macro = os.path.join(dirpath,"func.macro")
+
+def getimgsize(image):
+    w = 600
+    img = Image.open(image)
+    width = img.size[0]
+    height = img.size[1]
+    
+    ratio = float(width) / float(height)
+
+    h = int(w / ratio)
+    return (w,h)
 
 def render(tpl,ijson,out):
    
@@ -23,6 +35,7 @@ def render(tpl,ijson,out):
     temp.globals['open'] = open
     temp.globals['base64'] = base64.b64encode
     temp.globals["xlrd"] = xlrd
+    temp.globals["getimgsize"] = getimgsize
     args = json.loads(open(ijson).read())
     tmd = temp.render(**args)
     

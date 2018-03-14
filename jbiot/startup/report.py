@@ -1,11 +1,13 @@
 try:
     from config import render
+    from config import md2html
 except:
     render = "render.py"
-from jbiot import log
+    md2html = "md2html.py"
+
 import os
-from jbiot import jbiotWorker
 from jbiot import log
+from jbiot import jbiotWorker
 
 def get_file(remotefile):
     home = os.environ["HOME"]
