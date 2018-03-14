@@ -1,13 +1,10 @@
-# Add your requirements here like:
-# numpy
-# scipy>=0.9
 JYTools
 PyYaml
 jinja2
 xlrd
 xlwt
 docopt
-PyScaffold==2.5.0
+PyScaffold
 mkdocs
 wxpy
 wechat_sender
