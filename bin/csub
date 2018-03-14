@@ -31,6 +31,7 @@ def readlogs():
         err = {}
         fp = open(log)
         head = fp.readline()
+        head = fp.readline()
         head = head.strip()
         err[head] = []
         for line in fp.readlines():
@@ -76,10 +77,17 @@ if __name__ == "__main__":
     content = readlogs()
     msg = content[:500]
     cmd = "%s '%s'" % (jbio,msg)
-    os.system(cmd)
+    #try:
+    #    os.system(cmd)
+    #except:
+    #    pass
     if email:
         subject = "lsub run finished report"
         cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
-        os.system(cmd)
+        try:
+            os.system(cmd)
+        except:
+            pass
+
 
 

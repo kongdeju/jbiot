@@ -9,4 +9,7 @@ xlwt
 docopt
 PyScaffold==2.5.0
 mkdocs
-
+wxpy
+wechat_sender
+pytest-cov
+codecov
