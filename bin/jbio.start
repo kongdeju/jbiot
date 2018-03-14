@@ -15,7 +15,7 @@ def run():
 def Run():
     d = Thread(target=run)
     d.start()
-    d.join(10000)
+    d.join(1000000)
     if d.isAlive():
         d.terminate()
         d.join()
