@@ -10,8 +10,8 @@ from threading import Thread
 import time
 
 def run():
+    time.sleep(100)
     listen(bot,token="devlab",receivers=[deju,grp])
-
 def Run():
     d = Thread(target=run)
     d.start()
@@ -24,4 +24,3 @@ if __name__ == "__main__":
     while True:
         Run()
         time.sleep(10)
-

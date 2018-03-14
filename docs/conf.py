@@ -22,7 +22,7 @@ import sys
 # DON'T FORGET: Check the box "Install your project inside a virtualenv using
 # setup.py install" in the RTD Advanced Settings.
 import os
-sys.path.insert(0,os.path.abspath("../"))
+sys.path.insert(0,os.path.abspath("../jbiot"))
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
     import inspect
@@ -244,12 +244,3 @@ latex_documents = [
 
 # -- External mapping ------------------------------------------------------------
 python_version = '.'.join(map(str, sys.version_info[0:2]))
-intersphinx_mapping = {
-    'sphinx': ('http://sphinx.pocoo.org', None),
-    'python': ('http://docs.python.org/' + python_version, None),
-    'matplotlib': ('http://matplotlib.sourceforge.net', None),
-    'numpy': ('http://docs.scipy.org/doc/numpy', None),
-    'sklearn': ('http://scikit-learn.org/stable', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-}
