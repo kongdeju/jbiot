@@ -18,7 +18,7 @@ def jmail(reciever,subject="",msg="",msgtype="plain"):
     smtp_server = 'smtp.ym.163.com'
 
     s = smtplib.SMTP(smtp_server,25)
-    s.set_debuglevel(1)
+    #s.set_debuglevel(1)
     s.login(sender,password)
     s.sendmail(sender,reciever,msg.as_string())
     s.quit()

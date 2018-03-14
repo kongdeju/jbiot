@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-
+#coding=utf-8
 import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
@@ -10,6 +12,30 @@ from jbiot import csub
 import time
 import glob
 startime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+import yaml
+
+
+def reademail():
+    home = os.environ["HOME"]
+    cfg = os.path.join(home,".lcsub","config.yml")
+    if not os.path.exists(cfg):
+        return
+
+    fp = open(cfg)
+    cfg = yaml.load(fp.read())
+    if "email" in cfg:
+        return cfg["email"]
+
+def setemail(email):
+    out = {"email":email}
+    home = os.environ["HOME"]
+    cfg = os.path.join(home,".lcsub","config.yml")
+    cfgdir = os.path.join(home,".lcsub")
+    if not os.path.exists(cfgdir):
+        os.mkdir(cfgdir)
+    fp = open(cfg,"w")
+    outstr = yaml.dump(out,default_flow_style=False)
+    fp.write(outstr)
 
 def readlogs():
     content = "Job Finished.\n\n"
@@ -35,7 +61,7 @@ def readlogs():
         head = head.strip()
         err[head] = []
         for line in fp.readlines():
-            if line.find("Error") != -1 or line.find("error") != -1 or line.find("ERROR") != -1 :
+            if line.find("Error") != -1 or line.find("error") != -1 or line.find("ERROR") != -1 or line.find("not found") != -1 or line.find(u"无法") != -1 or line.find(u"没有") != -1 or line.find(u"错误") != -1:
                 err[head].append(line)
 
         errors.append(err)
@@ -81,6 +107,11 @@ if __name__ == "__main__":
     #    os.system(cmd)
     #except:
     #    pass
+
+    # with email...
+    if email :
+        setemail(email)
+    email = reademail()
     if email:
         subject = "lsub run finished report"
         cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
