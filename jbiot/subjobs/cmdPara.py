@@ -44,13 +44,20 @@ def cmdPara(stepfile):
         cmdlog = stepfile + "_%s.log" % (i+1)
         cmdecho = '''echo executing... "%s" ''' % cmd
         cmdecho = cmdecho + "\n"
-        if cmd.strip().startswith("for "):
-            cmd = cmd + "\n"
-        else:
-            if not cmd.startswith("cd"):
-                cmd = "echo %s 1>>%s 2>>%s;nohup %s 1>>%s 2>>%s & \n" % (cmd,cmdlog,cmdlog,cmd,cmdlog,cmdlog)
-            else:
-                cmd = '''echo "%s" ; %s 1 2  \n''' % (cmd,cmd)
+       
+        cmd = cmd.strip() 
+        cmd1 = "echo '%s' 1>>%s 2>>%s;nohup %s  2>>%s & \n" % (cmd,cmdlog,cmdlog,cmd,cmdlog)
+
+        cmd2 = ""
+        if cmd.startswith("for "):
+            cmd2 = cmd + "\n"
+        if  cmd.startswith("cd"):
+            cmd2 = '''echo "%s" ; %s 1 2  \n''' % (cmd,cmd)
+        
+        cmd = cmd1
+        if cmd2:cmd = cmd2
+
+
         fp.write(cmdecho)
         fp.write(cmd)
         j =  i + 1

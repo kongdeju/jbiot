@@ -56,14 +56,12 @@ def friendreply(msg):
         return
     tuling.do_reply(msg)
 
-'''
 @bot.register(Friend)
 def reply_deju(msg):
-    friendreply(msg)
+    print msg
 
 @bot.register(Group)
 def reply_devlab(msg):
-    grpreply(msg) 
-'''
+    print msg
 #listen(bot,token="devlab",receivers=[deju])
 

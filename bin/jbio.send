@@ -6,10 +6,10 @@ sys.setdefaultencoding("utf-8")
 
 from wechat_sender import Sender
 
-sender = Sender(token="devlab")
 
 def send(msg,user):
 
+    sender = Sender(token="devlab",port=9981)
     sender.send_to(msg,user)
            
 
