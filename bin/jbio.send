@@ -6,27 +6,27 @@ sys.setdefaultencoding("utf-8")
 
 from wechat_sender import Sender
 
-def send(msg):
-    sender = Sender(token="devlab")
-    sender.send(msg)
+sender = Sender(token="devlab")
 
+def send(msg,user):
+
+    sender.send_to(msg,user)
+           
 
 if __name__ == "__main__":
     from docopt import docopt
     usage = """
     Usage:
-        jbio.msg <msg>
+        jbio.send <msg> -u <wechat_name> 
 
     Options:
-        <msg>      message will send to deju
-
+        <msg>                       message content
+        -u,--user=wechat_name       wechat_name friend or group
     """
     args = docopt(usage)
     msg = args["<msg>"]
-    send(msg)
-
-
-
+    user = args["--user"]
+    send(msg,user)
 
 
 

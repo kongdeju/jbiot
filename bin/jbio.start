@@ -11,7 +11,7 @@ import time
 
 def run():
     time.sleep(100)
-    listen(bot,token="devlab",receivers=[deju,grp])
+    listen(bot,token="devlab")
 def Run():
     d = Thread(target=run)
     d.start()
@@ -21,6 +21,4 @@ def Run():
         d.join()
 
 if __name__ == "__main__":
-    while True:
-        Run()
-        time.sleep(10)
+    run()

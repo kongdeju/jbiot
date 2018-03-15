@@ -19,21 +19,23 @@ if not  os.path.exists(whome):
     cmd = "mkdir -p %s" % whome
     os.system(cmd)
 
-bot = Bot(botpk,console_qr=False)
 
-groups = bot.groups()
-grp = groups.search(u"生信研发群")[0]
 
-friends = bot.friends()
-deju = friends.search("D J. Kong")[0]
+bot = Bot(botpk,console_qr=True)
+
+#groups = bot.groups()
+#grp = groups.search(u"生信研发群")[0]
+#friends = bot.friends()
+#deju = friends.search("D J. Kong")[0]
 tuling = Tuling(api_key='184299f0a24146128073f5bc60e91812')
 
-def jbioreply(msg):
+
+def grpreply(msg):
     msgstr = msg.text
     print msgstr
     if msgstr.find(u"@晶宝") != -1:
         tuling.do_reply(msg)
-    if msgstr == "sysinfo":
+    if msgstr == "sys":
         disk = diskinfo()
         msg.reply(disk)
         mem = meminfo()
@@ -41,13 +43,27 @@ def jbioreply(msg):
         cpu = cpuinfo()
         msg.reply(cpu)
 
-@bot.register(deju)
+def friendreply(msg):
+    msgstr = msg.text
+    print msgstr
+    if msgstr == "sys":
+        disk = diskinfo()
+        msg.reply(disk)
+        mem = meminfo()
+        msg.reply(mem)
+        cpu = cpuinfo()
+        msg.reply(cpu)
+        return
+    tuling.do_reply(msg)
+
+'''
+@bot.register(Friend)
 def reply_deju(msg):
-    jbioreply(msg)
+    friendreply(msg)
 
-@bot.register(grp)
+@bot.register(Group)
 def reply_devlab(msg):
-    jbioreply(msg) 
-
+    grpreply(msg) 
+'''
 #listen(bot,token="devlab",receivers=[deju])
 

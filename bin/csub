@@ -14,7 +14,6 @@ import glob
 startime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 import yaml
 
-
 def reademail():
     home = os.environ["HOME"]
     cfg = os.path.join(home,".lcsub","config.yml")
@@ -27,15 +26,49 @@ def reademail():
         return cfg["email"]
 
 def setemail(email):
-    out = {"email":email}
     home = os.environ["HOME"]
     cfg = os.path.join(home,".lcsub","config.yml")
     cfgdir = os.path.join(home,".lcsub")
     if not os.path.exists(cfgdir):
         os.mkdir(cfgdir)
+    if os.path.exists(cfg):
+        infodict = yaml.load(open(cfg).read())
+    if not infodict:
+        infodict = {}
+    infodict["email"]  = email
     fp = open(cfg,"w")
-    outstr = yaml.dump(out,default_flow_style=False)
+    outstr = yaml.dump(infodict,default_flow_style=False)
     fp.write(outstr)
+
+
+def readwechat():
+    home = os.environ["HOME"]
+    cfg = os.path.join(home,".lcsub","config.yml")
+    if not os.path.exists(cfg):
+        return
+
+    fp = open(cfg)
+    cfg = yaml.load(fp.read())
+    if "wechat" in cfg:
+        return cfg["wechat"]
+
+def setwechat(wechat):
+    home = os.environ["HOME"]
+    cfg = os.path.join(home,".lcsub","config.yml")
+    cfgdir = os.path.join(home,".lcsub")
+    if not os.path.exists(cfgdir):
+        os.mkdir(cfgdir)
+    if os.path.exists(cfg):
+        infodict = yaml.load(open(cfg).read())
+    if not infodict:
+        infodict = {}
+    infodict["wechat"]  = wechat
+
+    fp = open(cfg,"w")
+    outstr = yaml.dump(infodict,default_flow_style=False)
+    fp.write(outstr)
+
+
 
 def readlogs():
     content = "Job Finished.\n\n"
@@ -84,36 +117,39 @@ if __name__ == "__main__":
 
     usage = """
     Usage:
-        csub.py <cmdfile> [--with-docker|--with-singularity] [-e <email>]
+        csub.py <cmdfile> [--with-docker|--with-singularity] [-e <email>] [-w <name>] 
 
     Options:
         -h --help           print this screen
         --with-docker       prefer to user docker when exec cmd
         --with-singularity  prefer to user singularity when exec cmd
         -e,--email=<email>  email which to remind of
+        -w,--wechat=<name>  wechat name
     """
     args = docopt(usage)
     cmdfile = args["<cmdfile>"]
     docker = args["--with-docker"]
     sing = args["--with-singularity"]
     email = args["--email"]
+    wechat = args["--wechat"]
     csub.csub(cmdfile,docker=docker,sing=sing)
 
 
     content = readlogs()
+    
     msg = content[:500]
-    cmd = "%s '%s'" % (jbio,msg)
-    #try:
-    #    os.system(cmd)
-    #except:
-    #    pass
-
+    if wechat:
+        setwechat(wechat)
+    wechat = readwechat()
+    #if wechat:
+    #    cmd = "%s '%s' -u '%s' " % (jbio,msg,wechat)
+    #    os.system(cmd)    
     # with email...
     if email :
         setemail(email)
     email = reademail()
     if email:
-        subject = "lsub run finished report"
+        subject = "csub run finished report"
         cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
         try:
             os.system(cmd)
