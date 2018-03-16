@@ -9,7 +9,7 @@ from wechat_sender import Sender
 
 def send(msg,user):
 
-    sender = Sender(token="devlab",port=9981)
+    sender = Sender(token="devlab",host="http://www.genescret.com",port=7749)
     sender.send_to(msg,user)
            
 

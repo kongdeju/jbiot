@@ -43,7 +43,7 @@ def csub(stepfile):
 #$ -o %s
 #$ -e %s
 date
-echo executing %s 
+echo executing '%s' 
 %s
 date
 echo finished

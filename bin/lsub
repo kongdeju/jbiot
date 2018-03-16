@@ -23,6 +23,8 @@ def reademail():
 
     fp = open(cfg)
     cfg = yaml.load(fp.read())
+    if not cfg:
+        return
     if "email" in cfg:
         return cfg["email"]
 
@@ -49,6 +51,8 @@ def readwechat():
 
     fp = open(cfg)
     cfg = yaml.load(fp.read())
+    if not cfg:
+        return
     if "wechat" in cfg:
         return cfg["wechat"]
 
