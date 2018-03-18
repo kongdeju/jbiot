@@ -10,8 +10,10 @@ from jbiot import lsub
 import glob
 jbio = os.path.join(os.path.dirname(os.path.abspath(__file__)),"jbio.send")
 jmail = os.path.join(os.path.dirname(os.path.abspath(__file__)),"jmail")
+cmd2showdoc = os.path.join(os.path.dirname(os.path.abspath(__file__)),"cmd2showdoc.py")
 import time
 import yaml
+import getpass
 
 startime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
@@ -117,7 +119,7 @@ if __name__ == "__main__":
 
     usage = """
     Usage:
-        lsub <cmdfile> [--with-docker|--with-singularity] [--dry] [-e <email>] [-w <name>]
+        lsub <cmdfile> [--with-docker|--with-singularity][--dry][-e <email>][-w <wexin_name>][-n <job_nam>]
 
     Options:
         -h --help                print this screen
@@ -126,6 +128,7 @@ if __name__ == "__main__":
         --with-singularity       prefer to user singularity when run cmd
         -e,--email=<email>       email of you want to remind of
         -w,--wechat=<name>       wechat name you want to send to
+        -n,--name=<job_name>     the name of this task.
     """
     args = docopt(usage)
     cmdfile = args["<cmdfile>"]
@@ -134,6 +137,7 @@ if __name__ == "__main__":
     sing = args["--with-singularity"]
     email = args["--email"]
     wechat = args["--wechat"]
+    name = args["--name"]
     lsub.main(cmdfile,dryflag,docker=docker,sing=sing)
     
     content = readlogs()
@@ -153,3 +157,14 @@ if __name__ == "__main__":
        subject = "lsub run finished report"
        cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
        os.system(cmd)
+
+    # upload to showdoc
+    startime = time.strftime('%m-%d-%H:%M',time.localtime(time.time()))
+    user = getpass.getuser()
+    title = "%s-%s" % (user,startime)
+    if name:
+        title =  "%s" % (name)
+    cmd = "%s %s -t %s" % (cmd2showdoc,cmdfile,title)
+    os.system(cmd)
+
+

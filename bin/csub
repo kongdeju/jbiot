@@ -8,11 +8,14 @@ dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
 jbio = os.path.join(os.path.dirname(os.path.abspath(__file__)),"jbio.send")
 jmail = os.path.join(os.path.dirname(os.path.abspath(__file__)),"jmail")
+cmd2showdoc = os.path.join(os.path.dirname(os.path.abspath(__file__)),"cmd2showdoc.py")
 from jbiot import csub
 import time
 import glob
 startime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 import yaml
+import getpass
+
 
 def reademail():
     home = os.environ["HOME"]
@@ -121,7 +124,7 @@ if __name__ == "__main__":
 
     usage = """
     Usage:
-        csub.py <cmdfile> [--with-docker|--with-singularity] [-e <email>] [-w <name>] 
+        csub.py <cmdfile> [--with-docker|--with-singularity][-e <email>][-w <weixin_name>][-n <name>] 
 
     Options:
         -h --help           print this screen
@@ -129,6 +132,7 @@ if __name__ == "__main__":
         --with-singularity  prefer to user singularity when exec cmd
         -e,--email=<email>  email which to remind of
         -w,--wechat=<name>  wechat name
+        -n,--name=<name>    jobname
     """
     args = docopt(usage)
     cmdfile = args["<cmdfile>"]
@@ -136,6 +140,7 @@ if __name__ == "__main__":
     sing = args["--with-singularity"]
     email = args["--email"]
     wechat = args["--wechat"]
+    name = args["--name"]
     csub.csub(cmdfile,docker=docker,sing=sing)
 
 
@@ -155,10 +160,14 @@ if __name__ == "__main__":
     if email:
         subject = "csub run finished report"
         cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
-        try:
-            os.system(cmd)
-        except:
-            pass
+        os.system(cmd)
 
-
+    # showdoc
+    startime = time.strftime('%m-%d-%H:%M',time.localtime(time.time()))
+    user = getpass.getuser()
+    title = "%s-%s" % (user,startime)
+    if name:
+        title =  "%s" % (name)
+    cmd = "%s %s -t %s" % (cmd2showdoc,cmdfile,title)
+    os.system(cmd)
 
