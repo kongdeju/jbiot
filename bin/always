@@ -42,7 +42,7 @@ def always(cmd,timeout,deamon):
 
     CMD = "%s '%s' -t %s" % (alwaysrun,cmd,timeout)
     if deamon: 
-        CMD = "nohup %s '%s' -t %s 1>>run.log 2>>run.log &" % (alwaysrun,cmd,timeout)
+        CMD = "nohup %s '%s' -t %s 1>>always.log 2>>always.log &" % (alwaysrun,cmd,timeout)
     print CMD
     os.system(CMD)
     
