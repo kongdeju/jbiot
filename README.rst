@@ -12,7 +12,6 @@ jbiot
      :target: https://codecov.io/gh/kongdeju/jbiot
 
 
-
 Description
 ===========
 
