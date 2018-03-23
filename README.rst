@@ -30,7 +30,6 @@ jbiot J. bioinformatic devtoolkits which contain::
     - tsv2xls.py
     - xls2tsv.py
 
-
 install it and try them::
     
     pip install jbiot
