@@ -64,7 +64,7 @@ def startup(proj):
     os.system(cmd)
 
     # bin/project.py    
-    mc = open(main_).read()
+    mc = open(raw).read()
     template =  Template(mc)
     main = template.render(projName=proj)
     mainpy = "%s/bin/%s.py" % (proj,proj)
@@ -75,6 +75,7 @@ def startup(proj):
     os.system(cmd)
 
     # main docker
+    '''
     mc = open(maindocker).read()
     template = Template(mc)
     md = template.render(projName=proj)
@@ -94,6 +95,7 @@ def startup(proj):
     fp.close()
     cmd = "chmod +x %s" % mdocker
     os.system(cmd)
+    '''
     #5. proj/arranger
     arrdir =  "%s/%s/arranger" % (proj,proj)
     cmd = "mkdir -p %s" % arrdir

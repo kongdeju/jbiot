@@ -8,6 +8,7 @@ from {{projName}}.reporter.report import report
 import yaml
 from jbiot import jbiotWorker
 
+# entrypoint function
 def {{projName}}(params):
 
     # call worker1
@@ -20,30 +21,24 @@ def {{projName}}(params):
 
     # call arrange
     indict = {}
-    
     outdict = arrange(indict)
 
     # call report
     indict = {}
-
     indict["render_json"] = outdict["render_json"]
-    if "{{projName}}_template" in params:
-        indict["{{projName}}_template"] = params["{{projName}}_template"]
-    else:
-        url = "http://www.genescret.com:6636/templates/{{projName}}_template.md"
-        indict["qc_report_template"] = url
-
     outdict = report(indict)
-
     # key and value need to write into main yaml
     output = {}
     
     return output
 
+# mulit-omics platform
 class {{projName}}Worker(jbiotWorker):
     def handle_task(self,key,params):
         self.execute({{projName}},params)
 
+
+# main function
 def main(yml):
     #1. read yaml 
     ymlstr = open(yml).read()
@@ -51,7 +46,7 @@ def main(yml):
     outputdict = {{projName}}(params)
     
     #2. write yaml
-    ystr = yaml.dump(outputdict)
+    ystr = yaml.dump(outputdict,default_flow_style=False)
     fp = open(yml,"w")
     fp.write(ymlstr)
     fp.write(ystr)
@@ -64,7 +59,7 @@ if __name__ == "__main__":
        {{projName}}.py -c <params> 
 
     Options:
-        -c,--conf <params>    params file for soft in yaml format,the following key is needed.
+        -c,--conf <params>    params in yaml format.
 
     """
     args = docopt(usage)
