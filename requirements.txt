@@ -6,7 +6,7 @@ xlrd
 xlwt
 docopt
 mkdocs
-wxpy
-wechat_sender
-pytest-cov
-codecov
+#wxpy
+#wechat_sender
+#pytest-cov
+#codecov
