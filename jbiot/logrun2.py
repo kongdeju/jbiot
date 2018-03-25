@@ -33,7 +33,7 @@ def dict2cmd(dic,cmdfile):
 class log:
 
     @staticmethod
-    def run(tag,cmd,para=1,mem="2G",docker='',singularity=''):
+    def run(tag,cmd,para=1,mem="2G",docker='kongdeju/alpine-dev:stable',singularity='alpine-dev.img'):
         cmdfile =  "run.cmd"
         cmdict = load2dict(cmdfile)
         tag = "#### %s --para=%s --mem=%s --docker=%s --singularity=%s" % (tag,para,mem,docker,singularity)
