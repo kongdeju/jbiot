@@ -21,7 +21,7 @@ if __name__ == "__main__":
     Options:
        -h --help            just print this screen
        <md>                 markdown format file
-       -s,--style=<style>    
+       -s,--style=<style>   mkdoc templates in tgz format,[default: mkdocsTemplate] 
        output               default ouput html.tgz
     """
     args = docopt(usage)

@@ -6,6 +6,7 @@ xlrd
 xlwt
 docopt
 mkdocs
+pymdown-extensions
 #wxpy
 #wechat_sender
 #pytest-cov

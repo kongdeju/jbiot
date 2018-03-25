@@ -5,20 +5,32 @@ dirpath = os.path.dirname(os.path.abspath(__file__))
 mkdoctemplate = os.path.join(dirpath,"mkdocsTemplate.tgz")
 mkdocs = "mkdocs"
 
+def get_style(style):
+    home = os.environ["HOME"]
+    mdir = os.path.join(home,".mkdocstyles")
+    if not os.path.exists(mdir):
+        os.mkdir(mdir)
+    tgz = style + ".tgz"
+    tgz = os.path.join(mdir,tgz)
+    if os.path.exists(tgz):
+        return tgz
+    url = "www.genescret.com:6636/dev-report/styles/%s.tgz" % style
+    cmd = "wget -P %s %s" % (mdir,url)
+    os.system(cmd)
+    return tgz
+
 def md2html(md,style):
-    global mkdoctemplate
-    if style:
-        mkdoctemplate = style
+    mkdoctemplate = get_style(style)
 
     curdir = os.getcwd()
     cmd = "tar xvzf %s" % mkdoctemplate
     os.system(cmd)
-
     
-    cmd = "cp -r %s mkdocFiles" % "mkdocsTemplate"
+    mkdocsdir = mkdoctemplate.split("/")[-1].split(".")[0]
+    cmd = "cp -r %s mkdocFiles" % mkdocsdir
     os.system(cmd)
 
-    cmd = "rm -rf mkdocsTemplate"
+    cmd = "rm -rf %s" %  mkdocsdir
     os.system(cmd)
 
     cmd = "cp %s mkdocFiles/docs/index.md" % md
@@ -57,7 +69,7 @@ if __name__ == "__main__":
     Options:
        -h --help            just print this screen
        <md>                 markdown format file
-       -s,--style=<style>   mkdoc templates in tgz format 
+       -s,--style=<style>   mkdoc templates in tgz format,[default: mkdocsTemplate] 
        output               default ouput html.tgz
     """
     args = docopt(usage)
