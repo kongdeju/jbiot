@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #coding=utf-8
 from __future__ import unicode_literals
-
+'''
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -64,4 +64,4 @@ def reply_deju(msg):
 def reply_devlab(msg):
     print msg
 #listen(bot,token="devlab",receivers=[deju])
-
+'''
