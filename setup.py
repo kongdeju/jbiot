@@ -33,6 +33,5 @@ def setup_package():
         scripts=find_bins()
         )
 
-
 if __name__ == "__main__":
     setup_package()
