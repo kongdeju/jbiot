@@ -9,6 +9,7 @@ class jbiotWorker(RedisWorker):
         indict = yaml.load(open(yml).read())
         if "work_dir" in indict:
             wdir = indict["work_dir"] 
+            if not os.path.exists(wdir): os.mkdir(wdir)
             os.chdir(wdir)
         output = myfunc(params)
         if os.path.exists("run.cmd"):
