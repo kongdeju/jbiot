@@ -6,7 +6,10 @@ def get_template(projName):
 
     home = os.environ["HOME"]
     tmpl = "%s_template.md" % projName
-    localdir = os.path.join(home,".templates") 
+    localdir = os.path.join(home,".templates")
+    if not os.path.exists(localdir):
+        os.mkdir(localdir)
+ 
     localfile = os.path.join(localdir,tmpl)
     if os.path.exists(localfile):
         return localfile

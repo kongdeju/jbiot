@@ -15,6 +15,7 @@ class jbiotWorker(RedisWorker):
         if os.path.exists("run.cmd"):
             cmds = ["sh","run.cmd"]
             self.execute_subprocess(cmds)
+            os.system("rm run.cmd")
         for k,v in output.items():
             self.set_output(k,v)
 
