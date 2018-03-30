@@ -6,9 +6,10 @@ except:
 from jbiot import jbiotWorker
 from jbiot import log
 from jbiot import yamladd
+import yaml
 
 def arrange(params):
-    """fastp arrange output files
+    """ {{projName}} arrange output files
 
     Args:
         params: indict , key is `yaml`, value in yaml file::

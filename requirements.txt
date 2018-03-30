@@ -6,6 +6,7 @@ xlrd
 xlwt
 docopt
 mkdocs
+pillow
 pymdown-extensions
 #wxpy
 #wechat_sender

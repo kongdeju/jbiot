@@ -25,7 +25,7 @@ def report(params):
     yamlin = params["yaml"]
     indict = yaml.load(open(yamlin))
 
-    templ = get_template({{projName}})
+    templ = get_template("{{projName}}")
     out = "{{projName}}.md"
     cmd = "%s -t %s -j %s -o %s -y" % (render,templ,yamlin,out)
     log.run("render {{projName}} template",cmd)

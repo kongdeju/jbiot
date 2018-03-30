@@ -20,6 +20,7 @@ def load2dict(cmdfile):
 
     return dic
 
+
 def dict2cmd(dic,cmdfile):
     fp = open(cmdfile,"w")
     for k,cmds in dic.items():
@@ -31,9 +32,9 @@ def dict2cmd(dic,cmdfile):
     fp.close()
     
 class log:
-
+    
     @staticmethod
-    def run(tag,cmd,para=1,mem="2G",docker='kongdeju/alpine-dev:stable',singularity='alpine-dev.img'):
+    def run(tag,cmd,para=1,mem="2G",docker='jbioi/alpine-dev',singularity='alpine-dev.img'):
         cmdfile =  "run.cmd"
         cmdict = load2dict(cmdfile)
         tag = "#### %s --para=%s --mem=%s --docker=%s --singularity=%s" % (tag,para,mem,docker,singularity)
@@ -49,7 +50,6 @@ def test_log():
     log.run("bwa align","bwa mem hg19.fq test.fq > out.sam")
     log.run("samtool align","bwa mem hg19.fq test.fq > out.sam")
     log.run("1","bwa mem hg19.fq test.fq > out.sam",para=2)
-
 
 
 if __name__ == "__main__":
