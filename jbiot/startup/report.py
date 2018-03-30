@@ -4,48 +4,38 @@ try:
 except:
     render = "render.py"
     md2html = "md2html.py"
-
-import os
 from jbiot import log
+import os
 from jbiot import jbiotWorker
 from jbiot import get_template
+from jbiot import yamladd
+import yaml
 
 def report(params):
-    """ convert md to html...
+    """ {{projName}} to markdown file and html file
 
-    Args:
-        params (dict) : report parmas::
+    Args: report input dict, key is `yaml`, value is yaml file path::
 
-            {
-                "render_json" : json file of arrrange.
-            }
+            "xx": path of xx.
 
     Returns:
-        dict : report dict::
-
-        {
-            "report_md": markdown file which is rendered.
-
-        }
-
+        dict : key is `yaml`,value is yaml file path
     """
-
     # handle input
-    templ = get_template("{{projName}}")
-    ijson = params["render_json"] 
+    yamlin = params["yaml"]
+    indict = yaml.load(open(yamlin))
 
-    # process cmd
+    templ = get_template({{projName}})
     out = "{{projName}}.md"
-    cmd = "%s -t %s -j %s -o %s" % (render,templ,ijson,out)
-    log.run("render mapping {{projName}} template",cmd,docker="kongdeju/alpine-dev:stable")
+    cmd = "%s -t %s -j %s -o %s -y" % (render,templ,yamlin,out)
+    log.run("render {{projName}} template",cmd)
     
     cmd = "%s %s" % (md2html,out)
-    log.run("md2html {{projName}} report ",cmd,docker="kongdeju/alpine-dev:stable")
-
-    # handle output
+    log.run("md2html {{projName}} ",cmd)
     outdict = {}
-    outdict["report_md"] = out
-    return outdict
+    outdict["{{projName}}"] = out
+    yamlout = yamladd(yamlin,outdict)
+    return yamlout
 
 class reportWorker(jbiotWorker):
     def handle_task(self,key,params):

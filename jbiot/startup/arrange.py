@@ -4,40 +4,35 @@ except:
     pass
 
 from jbiot import jbiotWorker
+from jbiot import log
+from jbiot import yamladd
 
 def arrange(params):
-    """ arrange outfile to destination directory and output json file for reporter
+    """fastp arrange output files
 
     Args:
-        params (dict):  arrange input dict::
+        params: indict , key is `yaml`, value in yaml file::
 
-            {}
+            "xx": path of xx.
 
     Returns:
-        dict : output dict::
-
-            {
-                "render_json": json file for reporter
-            }
+        dict : key is `yaml`, value is path of yaml file
 
     """
-    # copy files to report
 
+    # handle input
+    yamlin = params["yaml"]
+    indict = yaml.load(open(yamlin).read())
+ 
+    # process cmd
 
-
-    # output json file to report
-    outdict = {}    
-    ystr = json.dumps(outdict)
-    oj = "{{projName}}.json"
-    
-    cmd = "echo '%s' > %s " % (ystr,oj)
-    tag = "export {{projName}} to jsonfile"
-    log.run(tag,cmd)
 
     # handle output
-    out = {}
-    out["render_json"] = oj
-    return out
+
+    #handle out
+    outdict = {}
+    yamlout = yamladd(yamlin,outdict)
+    return yamlout
 
 class {{projName}}Arranger(jbiotWorker):
     def handle_task(self,key,params):

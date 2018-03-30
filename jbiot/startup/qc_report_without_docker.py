@@ -11,26 +11,12 @@ from jbiot import jbiotWorker
 # entrypoint function
 def {{projName}}(params):
 
-    # call worker1
-    indict = {}
-    pass 
+    # call apps
 
-    # call worker2
-    indict = {}
-    pass 
-
-    # call arrange
-    indict = {}
-    outdict = arrange(indict)
-
-    # call report
-    indict = {}
-    indict["render_json"] = outdict["render_json"]
-    outdict = report(indict)
-    # key and value need to write into main yaml
-    output = {}
+    arrange(params)
+    report(params)
     
-    return output
+    return params
 
 # mulit-omics platform
 class {{projName}}Worker(jbiotWorker):
@@ -41,16 +27,9 @@ class {{projName}}Worker(jbiotWorker):
 # main function
 def main(yml):
     #1. read yaml 
-    ymlstr = open(yml).read()
-    params = yaml.load(ymlstr)
-    outputdict = {{projName}}(params)
-    
-    #2. write yaml
-    ystr = yaml.dump(outputdict,default_flow_style=False)
-    fp = open(yml,"w")
-    fp.write(ymlstr)
-    fp.write(ystr)
-    fp.close()
+    params = {}
+    params["yaml"] = yml
+    {{projName}}(params)
 
 if __name__ == "__main__":
     from docopt import docopt
