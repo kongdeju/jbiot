@@ -1,5 +1,6 @@
 import os
 from collections import OrderedDict
+hostname = os.environ["HOSTNAME"]
 
 def load2dict(cmdfile):
     dic = OrderedDict()
@@ -17,7 +18,6 @@ def load2dict(cmdfile):
             dic[tag] = []
         else:
             dic[tag].append(line)
-
     return dic
 
 
@@ -32,25 +32,21 @@ def dict2cmd(dic,cmdfile):
     fp.close()
     
 class log:
-    
     @staticmethod
     def run(tag,cmd,para=1,mem="2G",docker='jbioi/alpine-dev',singularity='alpine-dev.img'):
-        cmdfile =  "run.cmd"
+        cmdfile =  hostname + ".cmd"
         cmdict = load2dict(cmdfile)
         tag = "#### %s --para=%s --mem=%s --docker=%s --singularity=%s" % (tag,para,mem,docker,singularity)
         if tag in cmdict:
             cmdict[tag].append(cmd)
         else:
             cmdict[tag] = [cmd]
-        
         dict2cmd(cmdict,cmdfile)
-
 
 def test_log():
     log.run("bwa align","bwa mem hg19.fq test.fq > out.sam")
     log.run("samtool align","bwa mem hg19.fq test.fq > out.sam")
     log.run("1","bwa mem hg19.fq test.fq > out.sam",para=2)
-
 
 if __name__ == "__main__":
     test_log()

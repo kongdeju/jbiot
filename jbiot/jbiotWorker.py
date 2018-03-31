@@ -1,6 +1,9 @@
 from JYTools.JYWorker import RedisWorker
 import os
 import yaml
+import time
+
+cmdfile = os.environ["HOSTNAME"] + ".cmd"
 
 class jbiotWorker(RedisWorker):
     def execMyfunc(self,myfunc,params):
@@ -12,10 +15,12 @@ class jbiotWorker(RedisWorker):
             if not os.path.exists(wdir): os.mkdir(wdir)
             os.chdir(wdir)
         output = myfunc(params)
-        if os.path.exists("run.cmd"):
-            cmds = ["sh","run.cmd"]
+        if os.path.exists(cmdfile):
+            cmds = ["sh",cmdfile]
             self.execute_subprocess(cmds)
-            os.system("rm run.cmd")
+            cmdfilebark = cmdfile + "." + str(int(time.time())) + ".bark"
+            cmd = "mv  %s %s" % (cmdfile,cmdfilebark)
+            os.system(cmd)
         for k,v in output.items():
             self.set_output(k,v)
 
