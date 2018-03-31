@@ -32,4 +32,4 @@ jbiot J. bioinformatic devtoolkits which contain::
 
 install it and try them::
     
-    pip install jbiot
+    pip install -U jbiot
