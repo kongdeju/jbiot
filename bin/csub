@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     usage = """
     Usage:
-        csub.py <cmdfile> [--with-docker|--with-singularity][-e <email>][-w <weixin_name>][-n <name>] 
+        csub.py [options] <cmdfile> 
 
     Options:
         -h --help           print this screen

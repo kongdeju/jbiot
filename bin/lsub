@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
     usage = """
     Usage:
-        lsub <cmdfile> [--with-docker|--with-singularity][--dry][-e <email>][-w <wexin_name>][-n <job_nam>]
+        lsub [options] <cmdfile> 
 
     Options:
         -h --help                print this screen
