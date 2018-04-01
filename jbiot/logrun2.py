@@ -1,6 +1,7 @@
 import os
 from collections import OrderedDict
 hostname = os.environ["HOSTNAME"]
+import hashlib
 
 def load2dict(cmdfile):
     dic = OrderedDict()
@@ -33,15 +34,36 @@ def dict2cmd(dic,cmdfile):
     
 class log:
     @staticmethod
-    def run(tag,cmd,para=1,mem="2G",docker='jbioi/alpine-dev',singularity='alpine-dev.img'):
+    def run(tag,cmd,i=[],o=[],para=1,mem="2G",docker='jbioi/alpine-dev',singularity='alpine-dev.img'):
         cmdfile =  hostname + ".cmd"
+        iocmdfile =  hostname + ".ali.cmd"
         cmdict = load2dict(cmdfile)
+        iocmdict = load2dict(iocmdfile)
         tag = "#### %s --para=%s --mem=%s --docker=%s --singularity=%s" % (tag,para,mem,docker,singularity)
+        icmd = "I=null"
+        if i:
+            i = ",".join(i)
+            icmd = "I=%s" % i
+        ocmd = "O=null"
+        if o:
+            o = ",".join(o)
+            ocmd = "O=%s" % o
+        iocmd = cmd + ";     " + icmd + ";" + ocmd
+
+        #dict
         if tag in cmdict:
             cmdict[tag].append(cmd)
         else:
             cmdict[tag] = [cmd]
         dict2cmd(cmdict,cmdfile)
+
+        #iodict        
+        if tag in iocmdict:
+            iocmdict[tag].append(iocmd)
+        else:
+            iocmdict[tag] = [iocmd]
+        dict2cmd(iocmdict,iocmdfile)
+
 
 def test_log():
     log.run("bwa align","bwa mem hg19.fq test.fq > out.sam")

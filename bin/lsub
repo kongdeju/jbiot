@@ -14,36 +14,8 @@ cmd2showdoc = os.path.join(os.path.dirname(os.path.abspath(__file__)),"cmd2showd
 import time
 import yaml
 import getpass
-
-startime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-
-def reademail():
-    home = os.environ["HOME"]
-    cfg = os.path.join(home,".lcsub","config.yml")
-    if not os.path.exists(cfg):
-        return
-
-    fp = open(cfg)
-    cfg = yaml.load(fp.read())
-    if not cfg:
-        return
-    if "email" in cfg:
-        return cfg["email"]
-
-def setemail(email):
-    home = os.environ["HOME"]
-    cfg = os.path.join(home,".lcsub","config.yml")
-    cfgdir = os.path.join(home,".lcsub")
-    if not os.path.exists(cfgdir):
-        os.mkdir(cfgdir)
-    if os.path.exists(cfg):
-        infodict = yaml.load(open(cfg).read())
-    if not infodict:
-        infodict = {}
-    infodict["email"]  = email
-    fp = open(cfg,"w")
-    outstr = yaml.dump(infodict,default_flow_style=False)
-    fp.write(outstr)
+from jbiot.subjobs.lsub_log import readlog
+from jbiot.subjobs.jbmsg import *
 
 def readwechat():
     home = os.environ["HOME"]
@@ -74,44 +46,6 @@ def setwechat(wechat):
     outstr = yaml.dump(infodict,default_flow_style=False)
     fp.write(outstr)
 
-def readlogs():
-    content = "Job Finished.\n\n"
-    content = content + "working dir : %s\n" % os.getcwd()
-    content = content + "start time: %s\n" % (startime)
-    endtime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-    content = content + "finished time: %s\n\n" % (endtime)
-
-    content = content + "Details:\n\n"
-    if not os.path.exists("logs"):
-        return "ERROR!!! no logs found. Job probably failed\n"
-
-    logs = glob.glob("logs/*.log")
-    logs = sorted(logs)
-
-    errors = []
-    for log in logs:
-        err = {}
-        fp = open(log)
-        head = fp.readline()
-        head = head.strip()
-        err[head] = []
-        for line in fp.readlines():
-            if line.find("Error") != -1 or line.find("error") != -1 or line.find("ERROR") != -1 or line.find("not found") != -1 or line.find(u"无法") != -1 or line.find(u"没有") != -1 or line.find(u"错误") != -1:
-                err[head].append(line)
-
-        errors.append(err)
-    
-    for err in errors:
-        for cmd,lines in err.items():
-            line =  "%s\n" % cmd
-            content = content + line
-            if not lines:
-                content = content +  "\t seems success\n"
-            for line in lines:
-                line = "\t%s\n" % line
-                content = content + line
-    content = content + "\n"
-    return content
 
 if __name__ == "__main__":
 
@@ -124,6 +58,9 @@ if __name__ == "__main__":
     Options:
         -h --help                print this screen
         --dry                    all done but run script
+        --rerun                  rerun the job from last failure point
+        --force                  force run even error detected
+        --verbose                verbose mode lot of information will print
         --with-docker            prefer to use docker when run cmd
         --with-singularity       prefer to user singularity when run cmd
         -e,--email=<email>       email of you want to remind of
@@ -138,33 +75,31 @@ if __name__ == "__main__":
     email = args["--email"]
     wechat = args["--wechat"]
     name = args["--name"]
-    lsub.main(cmdfile,dryflag,docker=docker,sing=sing)
+    verbose = args["--verbose"]
+    force = args["--force"]
+    rerun = args["--rerun"]
+    lsub.main(cmdfile,dryflag,docker=docker,sing=sing,rerun=rerun,verbose=verbose,force=force)
     
-    content = readlogs()
-    msg = content[:1000]
+    content = readlog(cmdfile)
     # try wechat to user
-    if wechat:
-        setwechat(wechat)
-    wechat = readwechat()
-    if wechat:
-        cmd = "%s '%s' -u '%s' " % (jbio,msg,wechat)
-        os.system(cmd)
+    #if wechat:
+    #    setwechat(wechat)
+    #wechat = readwechat()
+    #if wechat:
+    #    cmd = "%s '%s' -u '%s' " % (jbio,msg,wechat)
+    #    os.system(cmd)
     # email to user
     if email :
         setemail(email)
     email = reademail()
     if email:
-       subject = "lsub run finished report"
-       cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
-       os.system(cmd)
-
+        subject = "lsub run finished report"
+        if name:
+            subject = name
+        cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
+        os.system(cmd)
     # upload to showdoc
-    startime = time.strftime('%m-%d-%H:%M',time.localtime(time.time()))
-    user = getpass.getuser()
-    title = "%s-%s" % (user,startime)
     if name:
-        title =  "%s" % (name)
-    cmd = "%s %s -t %s" % (cmd2showdoc,cmdfile,title)
-    os.system(cmd)
-
+        cmd = "%s %s -t %s" % (cmd2showdoc,cmdfile,name)
+        os.system(cmd)
 

@@ -1,7 +1,6 @@
 
 
 
-
 def alisub(cmdfile):
     """sub cmdfile to aliyun batch-compute.
     mainly to handle docker input and output through analysize cmdfile...

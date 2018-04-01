@@ -2,7 +2,7 @@
 import sys
 sys.path.insert(0,"../jbiot")
 
-from subjobs.stripcmd import stripcmd
+from subjobs.lsub_strip import stripcmd
 
 
 cmdfile = "data/test.cmd"
