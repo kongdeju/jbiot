@@ -5,10 +5,10 @@
     sleep 1
     sleep 1
 
-# sleep2 test issuse 2
+# sleep2 test issuse 2 --para=3
 
-    sleep 1
-    sleep 1
-    sleep 1
+    echo 1
+    echo 2
+    echo 1
 
 
