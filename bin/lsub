@@ -17,36 +17,6 @@ import getpass
 from jbiot.subjobs.lsub_log import readlog
 from jbiot.subjobs.jbmsg import *
 
-def readwechat():
-    home = os.environ["HOME"]
-    cfg = os.path.join(home,".lcsub","config.yml")
-    if not os.path.exists(cfg):
-        return
-
-    fp = open(cfg)
-    cfg = yaml.load(fp.read())
-    if not cfg:
-        return
-    if "wechat" in cfg:
-        return cfg["wechat"]
-
-def setwechat(wechat):
-    home = os.environ["HOME"]
-    cfg = os.path.join(home,".lcsub","config.yml")
-    cfgdir = os.path.join(home,".lcsub")
-    if not os.path.exists(cfgdir):
-        os.mkdir(cfgdir)
-    if os.path.exists(cfg):
-        infodict = yaml.load(open(cfg).read())
-    if not infodict:
-        infodict = {}
-    infodict["wechat"]  = wechat
-
-    fp = open(cfg,"w")
-    outstr = yaml.dump(infodict,default_flow_style=False)
-    fp.write(outstr)
-
-
 if __name__ == "__main__":
 
     from docopt import docopt
