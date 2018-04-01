@@ -27,3 +27,4 @@ def main(cmd,dryflag,docker=False,sing=False,rerun=False,verbose=False,force=Fal
     if sing:
         cmd = dockersing(cmd,prefer="singularity")
     cmdrun = lsub(cmd,dryflag,rerun,verbose,force)
+    return cmd

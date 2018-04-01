@@ -11,7 +11,7 @@ def checklog(cid):
     logfile = os.path.join(logdir,cid)
    
     if not os.path.exists(logfile):
-        return "no logs found. \n"
+        return None,"no logs found. \n"
 
     err = ""
     fp = open(logfile)

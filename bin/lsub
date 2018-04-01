@@ -6,7 +6,7 @@ sys.setdefaultencoding("utf-8")
 import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
-from jbiot import lsub
+from jbiot.subjobs.dockersing import dockersing
 import glob
 jbio = os.path.join(os.path.dirname(os.path.abspath(__file__)),"jbio.send")
 jmail = os.path.join(os.path.dirname(os.path.abspath(__file__)),"jmail")
@@ -16,6 +16,47 @@ import yaml
 import getpass
 from jbiot.subjobs.lsub_log import readlog
 from jbiot.subjobs.jbmsg import *
+from jbiot.subjobs.lsub_strip import stripcmd
+from jbiot.subjobs import lsub_run
+from jbiot.jbio.jmail import jmail
+from jbiot.subjobs.cmd2showdoc import cmd2showdoc
+
+def lsub_email(cmdfile,email,name):
+    content = readlog(cmdfile)
+    if email :
+        setemail(email)
+    email = reademail()
+    if email:
+        if name:
+            subject = name
+            jmail(email,subject,content,)
+    if name:
+        cmd2showdoc(name,cmdfile)
+
+def lsub(cmd,dry,rerun,verbose,force,email,name):
+    tasks = stripcmd(cmd)
+    if dry:
+        return
+    for task in tasks:
+        cmdfile = task[0]
+        para = task[1]
+        fail = lsub_run.main(cmdfile,para,rerun,verbose)
+        if fail:
+            print "\033[1;31m"
+            print "contain failure,job stopped..."
+            print "\033[0m"
+            if not force:
+                lsub_email(cmd,email,name)
+                sys.exit(1)
+            print "go execute cause force mode is set on..."
+    lsub_email(cmd,email,name)
+
+def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=False,force=False,timeout=-1):
+    if docker :
+        cmdfile = dockersing(cmdfile,prefer="docker")
+    if sing:
+        cmdfile = dockersing(cmdfile,prefer="singularity")
+    lsub(cmdfile,dryflag,rerun,verbose,force,email,name) 
 
 if __name__ == "__main__":
 
@@ -36,6 +77,7 @@ if __name__ == "__main__":
         -e,--email=<email>       email of you want to remind of
         -w,--wechat=<name>       wechat name you want to send to
         -n,--name=<job_name>     the name of this task.
+        --timeout=<timeout>      maxium seconds to run this job [default: -1]
     """
     args = docopt(usage)
     cmdfile = args["<cmdfile>"]
@@ -48,28 +90,6 @@ if __name__ == "__main__":
     verbose = args["--verbose"]
     force = args["--force"]
     rerun = args["--rerun"]
-    lsub.main(cmdfile,dryflag,docker=docker,sing=sing,rerun=rerun,verbose=verbose,force=force)
+    timeout = args["--timeout"]
+    main(cmdfile,dryflag,email,name,docker=docker,sing=sing,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
     
-    content = readlog(cmdfile)
-    # try wechat to user
-    #if wechat:
-    #    setwechat(wechat)
-    #wechat = readwechat()
-    #if wechat:
-    #    cmd = "%s '%s' -u '%s' " % (jbio,msg,wechat)
-    #    os.system(cmd)
-    # email to user
-    if email :
-        setemail(email)
-    email = reademail()
-    if email:
-        subject = "lsub run finished report"
-        if name:
-            subject = name
-        cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
-        os.system(cmd)
-    # upload to showdoc
-    if name:
-        cmd = "%s %s -t %s" % (cmd2showdoc,cmdfile,name)
-        os.system(cmd)
-
