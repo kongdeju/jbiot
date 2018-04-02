@@ -41,10 +41,14 @@ class log:
         iocmdict = load2dict(iocmdfile)
         tag = "#### %s --para=%s --mem=%s --docker=%s --singularity=%s" % (tag,para,mem,docker,singularity)
         icmd = "I=unknown"
+        if i == None:
+            icmd = "I=null"
         if i:
             i = ",".join(i)
             icmd = "I=%s" % i
         ocmd = "O=unknown"
+        if o == None:
+            ocmd = "O=null"
         if o:
             o = ",".join(o)
             ocmd = "O=%s" % o
