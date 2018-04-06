@@ -35,7 +35,7 @@ def report(params):
     outdict = {}
     outdict["{{projName}}"] = out
     yamlout = yamladd(yamlin,outdict)
-    yamlout["outdir"] = os.getcwd()
+    yamlout["{{projName}}_outdir"] = os.getcwd()
     return yamlout
 
 class reportWorker(jbiotWorker):

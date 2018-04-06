@@ -1,0 +1,25 @@
+
+text: this is content...
+xls: test.xls
+
+xlss: 
+    - test.xls
+
+xlsdict:
+    sample: test.xls
+    sample2: test.xls
+
+png: test.png 
+
+pngs: 
+    - test.png
+    - test.png
+    - test.png
+
+pdf: out.pdf
+
+pdfs: 
+    - out.pdf
+    - out.pdf
+    - out.pdf
+

@@ -8,34 +8,32 @@ import base64
 import xlrd
 reload(sys)
 sys.setdefaultencoding('utf-8')
-from PIL import Image
-import yaml
 dirpath = os.path.dirname(os.path.abspath(__file__))
 macro = os.path.join(dirpath,"func.macro")
-
-def getimgsize(image):
-    w = 600
-    img = Image.open(image)
-    width = img.size[0]
-    height = img.size[1]
-    
-    ratio = float(width) / float(height)
-
-    h = int(w / ratio)
-    return (w,h)
-
+from PIL import Image
+import yaml
+from add_text import add_text
+from add_xls import add_xls
+from add_png import add_png
+from add_png import getName
+from add_png import b64 as baseimg
+from add_png import getimgsize
+from add_pdf import pdfs2pngs 
+from add_pdf import add_pdf
 
 def render(tpl,ijson,out,yml):
+    mac = open(macro).read()
     fcont = open(tpl).read()
-    fim = open(macro)
-    im = fim.read()
-    im = "%s\n" % im
-    fcont = im + fcont
+    fcont = mac + "\n\n" + fcont 
     temp = Template(fcont)
-    temp.globals['open'] = open
-    temp.globals['base64'] = base64.b64encode
-    temp.globals["xlrd"] = xlrd
+    temp.globals["add_text"] = add_text
+    temp.globals["add_xls"] = add_xls
+    temp.globals["add_png"] = add_png
+    temp.globals["baseimg"] = baseimg
     temp.globals["getimgsize"] = getimgsize
+    temp.globals["getName"] = getName
+    temp.globals["pdfs2pngs"] = pdfs2pngs
+    temp.globals["add_pdf"] = add_pdf
     if yml:
         args = yaml.load(open(ijson).read())
     else:
@@ -51,7 +49,6 @@ def render(tpl,ijson,out,yml):
 if __name__ == "__main__":
     import sys
     from docopt import docopt
-
     usage = """
     Usage:
         render.py -t <template> -j <ijson> -o <output> [-y]

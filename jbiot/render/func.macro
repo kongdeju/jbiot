@@ -1,0 +1,43 @@
+
+{%- macro add_pngs(images) %}
+<div class="clear boxCIB01">
+          <div class="ban" id="demo1">
+            <div class="ban2" id="ban_pic1">
+              <div class="prev1" id="prev1"><img src="./images/index_tab_l.png" alt="" width="28" height="51"></div>
+              <div class="next1" id="next1"><img src="./images/index_tab_r.png" alt="" width="28" height="51"></div>
+              <ul style="width: 1600px; left: 0px;">
+{% for item in images %}
+                        <li class="slide" style="float: left;"><a title="{{ getName(item) }}" href="javascript:;" class="img-toggle"><img src="data:image/png;base64,{{ baseimg(item) }}" width="{{getimgsize(item)[0]}}" height="getimgsize(item)[1]"></a></li>
+
+{% endfor %}
+              </ul>
+            </div>
+            <div class="min_pic">
+              <div class="prev_btn1" id="prev_btn1"><img src="./images/feel3.png" alt="" width="9" height="18"></div>
+              <div class="next_btn1" id="next_btn1"><img src="./images/feel4.png" alt="" width="9" height="18"></div>
+              <div class="num clearfix smallbox" id="ban_num1">
+              <ul style="width: 184px; height: 164px; left: 35%;">
+
+{% for i in range(images|length) %}
+{% if i == 0 %}
+                        <li class="slide on" style="float: left;"><a title="{{ getName(images[0]) }}}" href="javascript:;" class="img-toggle"><img src="data:image/png;base64,{{ baseimg(images[0])}}"></a></li>
+{% else %}
+                        <li class="slide" style="float: left;"><a title="{{ getName(images[i]) }}" href="javascript:;" class="img-toggle"><img src="data:image/png;base64,{{ baseimg(images[i]) }}" ></a></li>
+
+{% endif %}
+{% endfor %}
+              </ul>
+              </div>
+            </div>
+          </div>
+          <div class="mhc"></div>
+        </div>
+{% endmacro -%}
+
+{% macro add_pdfs(pdfs) %}
+{% set pngs = pdfs2pngs(pdfs) %}
+{{add_pngs(pngs)}}
+{% endmacro %}
+
+
+

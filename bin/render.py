@@ -5,7 +5,7 @@ import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
 
-from jbiot.render import render
+from jbiot.render.render import render
 
 if __name__ == "__main__":
     import sys
