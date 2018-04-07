@@ -45,14 +45,8 @@ def add_xls(table):
         return tab
 
     if type(table) == dict:
-        for k,v in table.items():
-            if type(v) == str and checkexists(v):
-                tab = render_xls(v)
-                return tab
-            if type(v) == list and checkexists(v[0]):
+            v = table.values()
+            if checkexists(v[0]):
                 tab = render_xls(v[0])
-                return tab
-            if type(v) == dict and checkexists(v.values[0]):
-                tab = render_xls(v.values[0])
                 return tab
     return "no table data"

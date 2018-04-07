@@ -1,7 +1,12 @@
 import os
 from collections import OrderedDict
-hostname = os.environ["HOSTNAME"]
 import hashlib
+import sys
+
+main_name =  sys.argv[0]
+main_name = main_name.split("/")[-1].split(".")[0]
+
+hostname = main_name
 
 def load2dict(cmdfile):
     dic = OrderedDict()
@@ -68,7 +73,25 @@ class log:
             iocmdict[tag] = [iocmd]
         dict2cmd(iocmdict,iocmdfile)
 
+    @staticmethod
+    def move(files,tgtdir):
 
+        dircmd = "mkdir -p %s" % tgtdir
+        log.run(dircmd,dircmd)
+        tag = "copy files to %s" % tgtdir
+
+        if type(files) == dict:
+            files = files.values()
+
+        if type(files) == str:
+            cmd = "cp %s %s " % (files,tgtdir)
+            log.run(tag,cmd)
+
+        if type(files) == list:
+            for f in files:
+                cmd = "cp %s %s" % (f,tgtdir)
+                log.run(tag,cmd)
+                                                    
 def test_log():
     log.run("bwa align","bwa mem hg19.fq test.fq > out.sam")
     log.run("samtool align","bwa mem hg19.fq test.fq > out.sam")

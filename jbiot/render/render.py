@@ -20,6 +20,7 @@ from add_png import b64 as baseimg
 from add_png import getimgsize
 from add_pdf import pdfs2pngs 
 from add_pdf import add_pdf
+from add_pngs import handle_pngs
 
 def render(tpl,ijson,out,yml):
     mac = open(macro).read()
@@ -34,6 +35,7 @@ def render(tpl,ijson,out,yml):
     temp.globals["getName"] = getName
     temp.globals["pdfs2pngs"] = pdfs2pngs
     temp.globals["add_pdf"] = add_pdf
+    temp.globals["handle_pngs"] = handle_pngs
     if yml:
         args = yaml.load(open(ijson).read())
     else:

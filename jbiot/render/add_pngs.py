@@ -6,5 +6,13 @@ def checkexists(afile):
 
 
 
- 
+def handle_pngs(pngs):
     
+    if type(pngs) == dict:
+        pngs = pngs.values()
+
+    reals = []
+    for png in pngs[:5]:
+        if checkexists(png):
+            reals.append(png)
+    return reals

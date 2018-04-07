@@ -37,9 +37,17 @@ def add_png(png):
     if not png:
         return "\nno img data\n"
 
+    if type(png) == list:
+        png = png[0]
+
+    if type(png) == dict:
+        png = png.values()[0]
+
     if type(png) == str and checkexists(png):
         img = render_png(png)
         return img
+
+
 
     return "\nno img data\n"
 

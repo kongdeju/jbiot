@@ -23,3 +23,18 @@ pdfs:
     - out.pdf
     - out.pdf
 
+
+pngsdict:
+    sample1: test.png
+    sample2: test.png
+    sample3: test.png
+
+pdfsdict:
+    sample1: out.pdf
+    sample2: out.pdf
+    sample3: out.pdf
+
+pngsnull:
+    - no.png
+    - no.png
+    - no.png

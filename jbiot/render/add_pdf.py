@@ -45,9 +45,12 @@ def pdf2png(pdf):
 def pdfs2pngs(pdfs):
     
     pngs = []
+    if type(pdfs) == dict:
+        pdfs = pdfs.values()
     for pdf in pdfs:
-        png = pdf2png(pdf)
-        pngs.append(png)
+        if checkexists(pdf):
+            png = pdf2png(pdf)
+            pngs.append(png)
     return pngs
 
 

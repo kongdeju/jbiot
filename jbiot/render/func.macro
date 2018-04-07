@@ -1,5 +1,7 @@
 
 {%- macro add_pngs(images) %}
+{% set images = handle_pngs(images) %}
+{% if images %}
 <div class="clear boxCIB01">
           <div class="ban" id="demo1">
             <div class="ban2" id="ban_pic1">
@@ -32,6 +34,9 @@
           </div>
           <div class="mhc"></div>
         </div>
+{% else %}
+no pics data
+{% endif %}
 {% endmacro -%}
 
 {% macro add_pdfs(pdfs) %}

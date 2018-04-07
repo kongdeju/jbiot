@@ -39,4 +39,19 @@ add pdfs go here...
 
 {{add_pdfs(pdfs)}}
 
+add_pngs dict go here...
 
+{{add_pngs(pngsdict)}}
+
+
+add_pdfs dict go here...
+
+{{add_pdfs(pdfsdict)}}
+
+add_pngsnodict go here..
+
+{{add_pngs(pngsnull)}}
+
+add_pdfsnodict go here..
+
+{{add_pdfs(pngsnull)}}

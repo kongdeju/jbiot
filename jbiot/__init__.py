@@ -7,6 +7,7 @@ except:
     __version__ = '1.0.2'
 
 from logrun2 import *
+from logmove import logmove
 from subjobs import lsub 
 from subjobs  import csub
 from arrange import arrange
