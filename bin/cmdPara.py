@@ -1,1 +1,0 @@
-../jbiot/subjobs/cmdPara.py

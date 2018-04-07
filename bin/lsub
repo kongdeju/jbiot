@@ -14,10 +14,10 @@ cmd2showdoc = os.path.join(os.path.dirname(os.path.abspath(__file__)),"cmd2showd
 import time
 import yaml
 import getpass
-from jbiot.subjobs.lsub_log import readlog
+from jbiot.subjobs.lsub.jblog import readlog
 from jbiot.subjobs.jbmsg import *
-from jbiot.subjobs.lsub_strip import stripcmd
-from jbiot.subjobs import lsub_run
+from jbiot.subjobs.lsub.lsub_strip import stripcmd
+from jbiot.subjobs.lsub import lsub_run
 from jbiot.jbio.jmail import jmail
 from jbiot.subjobs.cmd2showdoc import cmd2showdoc
 
@@ -43,12 +43,12 @@ def lsub(cmd,dry,rerun,verbose,force,email,name):
         fail = lsub_run.main(cmdfile,para,rerun,verbose)
         if fail:
             print "\033[1;31m"
-            print "contain failure,job stopped..."
+            print "contain failure,job should be stopped..."
             print "\033[0m"
             if not force:
                 lsub_email(cmd,email,name)
                 sys.exit(1)
-            print "go execute cause force mode is set on..."
+            print "\033[1;31mgo execute cause force mode is set on...\033[0m"
     lsub_email(cmd,email,name)
 
 def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=False,force=False,timeout=-1):

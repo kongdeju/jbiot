@@ -6,168 +6,87 @@ sys.setdefaultencoding("utf-8")
 import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
-jbio = os.path.join(os.path.dirname(os.path.abspath(__file__)),"jbio.send")
-jmail = os.path.join(os.path.dirname(os.path.abspath(__file__)),"jmail")
-cmd2showdoc = os.path.join(os.path.dirname(os.path.abspath(__file__)),"cmd2showdoc.py")
-from jbiot import csub
-import time
+from jbiot.subjobs.dockersing import dockersing
 import glob
-startime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+import time
 import yaml
 import getpass
+from jbiot.subjobs.csub.jblog import readlog
+from jbiot.subjobs.jbmsg import *
+from jbiot.subjobs.csub.csub_strip import stripcmd
+from jbiot.subjobs.csub import csub_run 
+from jbiot.jbio.jmail import jmail
+from jbiot.subjobs.cmd2showdoc import cmd2showdoc
 
+def csub_email(cmdfile,email,name):
+    content = readlog(cmdfile)
+    if email :
+        setemail(email)
+    email = reademail()
+    if email:
+        if name:
+            subject = name
+            jmail(email,subject,content,)
+    if name:
+        cmd2showdoc(name,cmdfile)
 
-def reademail():
-    home = os.environ["HOME"]
-    cfg = os.path.join(home,".lcsub","config.yml")
-    if not os.path.exists(cfg):
+def csub(cmd,dry,rerun,verbose,force,email,name):
+    tasks = stripcmd(cmd)
+    if dry:
         return
+    for task in tasks:
+        cmdfile = task[0]
+        mem = task[1]
+        fail = csub_run.main(cmdfile,mem,rerun,verbose)
+        if fail:
+            print "\033[1;31m"
+            print "contain failure,job should be stopped..."
+            print "\033[0m"
+            if not force:
+                csub_email(cmd,email,name)
+                sys.exit(1)
+            print "\033[1;31mgo on execute cause force mode is set on...\033[0m"
+    csub_email(cmd,email,name)
 
-    fp = open(cfg)
-    cfg = yaml.load(fp.read())
-    if not cfg:
-        return
-    if "email" in cfg:
-        return cfg["email"]
-
-def setemail(email):
-    home = os.environ["HOME"]
-    cfg = os.path.join(home,".lcsub","config.yml")
-    cfgdir = os.path.join(home,".lcsub")
-    if not os.path.exists(cfgdir):
-        os.mkdir(cfgdir)
-    if os.path.exists(cfg):
-        infodict = yaml.load(open(cfg).read())
-    if not infodict:
-        infodict = {}
-    infodict["email"]  = email
-    fp = open(cfg,"w")
-    outstr = yaml.dump(infodict,default_flow_style=False)
-    fp.write(outstr)
-
-
-def readwechat():
-    home = os.environ["HOME"]
-    cfg = os.path.join(home,".lcsub","config.yml")
-    if not os.path.exists(cfg):
-        return
-
-    fp = open(cfg)
-    cfg = yaml.load(fp.read())
-    if not cfg:
-        return
-    if "wechat" in cfg:
-        return cfg["wechat"]
-
-def setwechat(wechat):
-    home = os.environ["HOME"]
-    cfg = os.path.join(home,".lcsub","config.yml")
-    cfgdir = os.path.join(home,".lcsub")
-    if not os.path.exists(cfgdir):
-        os.mkdir(cfgdir)
-    if os.path.exists(cfg):
-        infodict = yaml.load(open(cfg).read())
-    if not infodict:
-        infodict = {}
-    infodict["wechat"]  = wechat
-
-    fp = open(cfg,"w")
-    outstr = yaml.dump(infodict,default_flow_style=False)
-    fp.write(outstr)
-
-
-
-def readlogs():
-    content = "Job Finished.\n\n"
-    content = content + "working dir : %s\n" % os.getcwd()
-    content = content + "start time: %s\n" % (startime)
-    endtime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-    content = content + "finished time: %s\n\n" % (endtime)
-
-    content = content + "Details:\n\n"
-    if not os.path.exists("logs"):
-        return "ERROR!!! no logs found. Job probably failed\n"
-
-    logs = glob.glob("logs/*.log")
-    logs = sorted(logs)
-
-    errors = []
-
-    for log in logs:
-        err = {}
-        fp = open(log)
-        head = fp.readline()
-        head = fp.readline()
-        head = head.strip()
-        err[head] = []
-        for line in fp.readlines():
-            if line.find("Error") != -1 or line.find("error") != -1 or line.find("ERROR") != -1 or line.find("not found") != -1 or line.find(u"无法") != -1 or line.find(u"没有") != -1 or line.find(u"错误") != -1:
-                err[head].append(line)
-
-        errors.append(err)
-
-    for err in errors:
-        for cmd,lines in err.items():
-            line =  "%s\n" % cmd
-            content = content + line
-            if not lines:
-                content = content +  "\t seems success\n"
-            for line in lines:
-                line = "\t%s\n" % line
-                content = content + line
-    content = content + "\n"
-    return content
-
+def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=False,force=False,timeout=-1):
+    if docker :
+        cmdfile = dockersing(cmdfile,prefer="docker")
+    if sing:
+        cmdfile = dockersing(cmdfile,prefer="singularity")
+    csub(cmdfile,dryflag,rerun,verbose,force,email,name) 
 
 if __name__ == "__main__":
+
     from docopt import docopt
 
     usage = """
     Usage:
-        csub.py [options] <cmdfile> 
+        csub [options] <cmdfile> 
 
     Options:
-        -h --help           print this screen
-        --with-docker       prefer to user docker when exec cmd
-        --with-singularity  prefer to user singularity when exec cmd
-        -e,--email=<email>  email which to remind of
-        -w,--wechat=<name>  wechat name
-        -n,--name=<name>    jobname
+        -h --help                print this screen
+        --dry                    all done but run script
+        --rerun                  rerun the job from last failure point
+        --force                  force run even error detected
+        --verbose                verbose mode lot of information will print
+        --with-docker            prefer to use docker when run cmd
+        --with-singularity       prefer to user singularity when run cmd
+        -e,--email=<email>       email of you want to remind of
+        -w,--wechat=<name>       wechat name you want to send to
+        -n,--name=<job_name>     the name of this task.
+        --timeout=<timeout>      maxium seconds to run this job [default: -1]
     """
     args = docopt(usage)
     cmdfile = args["<cmdfile>"]
+    dryflag = args["--dry"]
     docker = args["--with-docker"]
     sing = args["--with-singularity"]
     email = args["--email"]
     wechat = args["--wechat"]
     name = args["--name"]
-    csub.csub(cmdfile,docker=docker,sing=sing)
-
-
-    content = readlogs()
+    verbose = args["--verbose"]
+    force = args["--force"]
+    rerun = args["--rerun"]
+    timeout = args["--timeout"]
+    main(cmdfile,dryflag,email,name,docker=docker,sing=sing,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
     
-    msg = content[:500]
-    if wechat:
-        setwechat(wechat)
-    wechat = readwechat()
-    #if wechat:
-    #    cmd = "%s '%s' -u '%s' " % (jbio,msg,wechat)
-    #    os.system(cmd)    
-    # with email...
-    if email :
-        setemail(email)
-    email = reademail()
-    if email:
-        subject = "csub run finished report"
-        cmd = "%s -t %s -s '%s' -c '%s'" % (jmail,email,subject,content)
-        os.system(cmd)
-
-    # showdoc
-    startime = time.strftime('%m-%d-%H:%M',time.localtime(time.time()))
-    user = getpass.getuser()
-    title = "%s-%s" % (user,startime)
-    if name:
-        title =  "%s" % (name)
-    cmd = "%s %s -t %s" % (cmd2showdoc,cmdfile,title)
-    os.system(cmd)
-

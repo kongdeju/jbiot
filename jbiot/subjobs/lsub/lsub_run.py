@@ -25,7 +25,7 @@ def run(cid,cmd,rerun=False,verbose=False):
     if rerun:
         s = checkstatus(cid)
     if s:
-        status = "passed"
+        status = "\033[1;32mpassed\0dd[0m"
     logdir = ".log"
     d = "mkdir -p %s" % logdir
     os.system(d)
@@ -34,23 +34,34 @@ def run(cid,cmd,rerun=False,verbose=False):
     if not s:
         p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         flag = p.wait()
-        stdinfo = p.stdout.read() + "\n"
-        errinfo = p.stderr.read() + "\n"
-        fp.write("standard output1:\n")
+        stdinfo = p.stdout.read() 
+        errinfo = p.stderr.read()
         fp.write(stdinfo)
-        fp.write("standard output2:\n")
         fp.write(errinfo)
         fp.close()
-        if verbose:
-            os.system("cat %s" % logfile)
-        if flag == 0 :
-            status = "success"
-            addstatus(cid)
+        status = "\033[1;33mfailed\033[0m"
+        if not flag :
             s = 1
-        else:
-            s = 0
-            status = "failed check detail \033[1;31m %s \033[0m" % logfile
-    print "\t%s   %s" % (cmd,status)
+            status = "\033[1;32msuccess\033[0m"
+            addstatus(cid)
+
+    info = """
+    exec... %s
+        status: %s
+        logfile: %s
+    """ % (cmd,status,logfile)
+    if verbose:
+        logcmd = "cat %s" % logfile
+        p = subprocess.Popen(logcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        p.wait()
+        log = p.stdout.read()
+        info = """
+    exec... %s
+        status: %s
+        logfile: %s
+        details: %s
+        """ % (cmd,status,logfile,log)
+    print info
     return s
 
 def parsecmd(cmdfile,rerun,debug):
