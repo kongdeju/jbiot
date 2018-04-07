@@ -6,7 +6,7 @@ import sys
 main_name =  sys.argv[0]
 main_name = main_name.split("/")[-1].split(".")[0]
 
-hostname = main_name
+hostname = os.environ["HOSTNAME"]
 
 def load2dict(cmdfile):
     dic = OrderedDict()
@@ -44,7 +44,7 @@ class log:
         iocmdfile =  hostname + ".ali.cmd"
         cmdict = load2dict(cmdfile)
         iocmdict = load2dict(iocmdfile)
-        tag = "#### %s --para=%s --mem=%s --docker=%s --singularity=%s" % (tag,para,mem,docker,singularity)
+        tag = "#### %s: %s --para=%s --mem=%s --docker=%s --singularity=%s" % (main_name,tag,para,mem,docker,singularity)
         icmd = "I=unknown"
         if i == None:
             icmd = "I=null"
