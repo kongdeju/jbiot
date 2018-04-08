@@ -25,8 +25,8 @@ def arrange(params):
     yamlin = params["yaml"]
     indict = yaml.load(open(yamlin).read())
  
-    # process cmd
-
+    # process cmd and user log.move to arrange files to report
+    pass
 
     # handle output
 

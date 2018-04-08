@@ -28,10 +28,10 @@ def report(params):
     templ = get_template("{{projName}}")
     out = "{{projName}}.md"
     cmd = "%s -t %s -j %s -o %s -y" % (render,templ,yamlin,out)
-    log.run("render {{projName}} template",cmd)
+    log.run("render {{projName}} template",cmd,docker="jbioi/report",singularity="report.img")
     
     cmd = "%s %s" % (md2html,out)
-    log.run("md2html {{projName}} ",cmd)
+    log.run("md2html {{projName}} ",cmd,docker="jbioi/report",singularity="report.img")
     outdict = {}
     outdict["{{projName}}"] = out
     yamlout = yamladd(yamlin,outdict)
