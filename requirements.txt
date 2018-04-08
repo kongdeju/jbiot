@@ -8,6 +8,8 @@ docopt
 mkdocs
 pillow
 pymdown-extensions
+batchcompute-cli
+oss2
 #wxpy
 #wechat_sender
 #pytest-cov
