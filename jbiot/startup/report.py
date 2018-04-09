@@ -25,9 +25,12 @@ def report(params):
     yamlin = params["yaml"]
     indict = yaml.load(open(yamlin))
 
+    render_yml = "{{projName}}_render.yml"
+    cmd = "echo '%s' > %s" % (yaml.dump(open(yamlin).read()),render_yml)
+
     templ = get_template("{{projName}}")
     out = "{{projName}}.md"
-    cmd = "%s -t %s -j %s -o %s -y" % (render,templ,yamlin,out)
+    cmd = "%s -t %s -j %s -o %s -y" % (render,templ,render_yml,out)
     log.run("render {{projName}} template",cmd,docker="jbioi/report",singularity="report.img")
     
     cmd = "%s %s" % (md2html,out)

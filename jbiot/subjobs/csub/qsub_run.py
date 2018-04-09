@@ -89,8 +89,13 @@ def qsub_run(cmdid,cmdmem,cmd):
 
 if __name__ == "__main__":
     import sys
-    cmdid = sys.argv[1]
-    cmdmem = sys.argv[2]
-    cmd = sys.argv[3]
+    cmdfile = sys.argv[1]
+    cmdid = cmdfile.split("/")[-1].split(".")[0]
+    fp = open(cmdfile)
+    cmdmem = fp.readline()
+    cmdmem = cmdmem.strip("\n")
+    cmd = fp.readline()
+    cmd = cmd.strip("\n")
+    fp.close()
     status,logfile,jobid = qsub_run(cmdid,cmdmem,cmd)
     print status,logfile,jobid

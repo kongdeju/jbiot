@@ -80,4 +80,80 @@ def ossdownload(ossdir,obj):
             msg = "Download %s to %s successfully" % (oj,localfile)
 #ossdownload("oss://jbiobio/working","em")
 
+def ossprofile(ossdir):
+    buc = ossdir[6:].split("/")[0]
+    osspath = ossdir[6+len(buc)+1:]
+    bucket = oss2.Bucket(auth,region,buc)
+    profile = {}
+    for obj in oss2.ObjectIterator(bucket,osspath):
+        name = obj.key
+        name = name[len(osspath)+1:]
+        if  name.endswith("/"):
+            continue
+        if not name:
+            continue
+        size = obj.size
+        profile[name] = size
+    return profile
+
+#print ossprofile("oss://jbiobio/working")
+
+def localprofile():
+    profile = {}
+    for root,dirs,files in os.walk("."):
+        for f in files:
+            absfile = os.path.join(root,f)
+            size = os.path.getsize(absfile)
+            profile[absfile[2:]] = size
+    return profile
+
+#print localprofile()
+
+
+def checkdiff(ossdir):
+    ossprf = ossprofile(ossdir)
+    lclprf = localprofile()
+    
+    touploads = []
+    for ln,lz in lclprf.items():
+        if ln in ossprf and lz == ossprf[ln]:
+            continue
+        touploads.append(ln)
+    return touploads
+
+#checkdiff("oss://jbiobio/working")
+
+def mapdown(ossdir):
+    ossdirmapping(ossdir)
+
+
+def mapup(ossdir):
+    touploads = checkdiff(ossdir)
+    for lf in touploads:
+        ossupload(lf,ossdir)
+  
+
+if __name__ == "__main__":
+    from docopt import docopt
+
+    usage = """
+    Usage:
+        osstools.py mapdown <ossdir>
+        osstools.py mapup   <ossdir>
+
+    Options:
+        <ossdir>         ossdir in such format. oss://bucket/dir/
+    """
+    args = docopt(usage)
+
+    mapdownflag = args["mapdown"]
+    mapupflag = args["mapup"]
+    ossdir = args["ossdir"]
+
+    if mapdownflag:
+        mapdown(ossdir)
+    if mapupflag:
+        mapup(ossdir)
+
+
 

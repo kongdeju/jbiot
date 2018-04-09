@@ -81,8 +81,18 @@ class log:
         tag = "copy files to %s" % tgtdir
 
         if type(files) == dict:
-            files = files.values()
+            v = files.values()[0]
+            if type(v) == list:
+                outs = []
+                for its in files.values():
+                    outs.extend(its)
+            if type(v) == str:
+                outs = files.values()
 
+            for f in outs:
+                cmd = "cp %s %s" % (f,tgtdir)
+                log.run(tag,cmd)
+        
         if type(files) == str:
             cmd = "cp %s %s " % (files,tgtdir)
             log.run(tag,cmd)

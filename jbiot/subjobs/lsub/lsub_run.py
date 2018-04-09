@@ -32,12 +32,8 @@ def run(cid,cmd,rerun=False,verbose=False):
     logfile = os.path.join(logdir,cid)
     fp = open(logfile,"w")
     if not s:
-        p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        p = subprocess.Popen(cmd,shell=True,stdout=fp,stderr=fp)
         flag = p.wait()
-        stdinfo = p.stdout.read() 
-        errinfo = p.stderr.read()
-        fp.write(stdinfo)
-        fp.write(errinfo)
         fp.close()
         status = "\033[1;33mfailed\033[0m"
         if not flag :

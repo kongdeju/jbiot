@@ -21,15 +21,16 @@ def addstatus(cid):
     cmd = "touch %s" % cp
     os.system(cmd)
 
-def run(cid,cmd,cmdmem,rerun=False,verbose=False):
+def run(cid,cmd,cmdfile,rerun=False,verbose=False):
     s = 0
     status = "\033[1;33mfailed\033[0m"
+    cid = cmdfile.split("/")[-1].split(".")[0]
     if rerun:
         s = checkstatus(cid)
     if s:
         status = "\033[1;32mpassed\033[0m"
     logfile = os.path.join(".log","%s.log"%cid)
-    qcmd = "%s %s %s '%s'" % (qsub_run,cid,cmdmem,cmd)
+    qcmd = '%s %s ' % (qsub_run,cmdfile)
     if not s:
         p = subprocess.Popen(qcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         p.wait()
@@ -72,12 +73,23 @@ def parsecmd(cmdfile,cmdmem,rerun,debug):
     fp = open(cmdfile)
     ct = cmdfile
     torun = []
+    taskdir = ".task"
+    if not os.path.exists(taskdir):
+        os.system("mkdir -p %s" % taskdir)
     for line in fp.readlines():
         ct = ct + line
         cid = hashlib.md5(ct)
         cid = cid.hexdigest()
         cmd = line.strip()
-        torun.append([cid,cmd,cmdmem,rerun,debug])
+        cmdf = cid + ".cmd"
+        cmdf = os.path.join(taskdir,cmdf)
+        fp = open(cmdf,"w") 
+        line = cmdmem + "\n"
+        fp.write(line)
+        line = cmd + "\n"
+        fp.write(line)
+        fp.close()
+        torun.append([cid,cmd,cmdf,rerun,debug])
     return torun
 
 def main(cmdfile,cmdmem,rerun,debug):
