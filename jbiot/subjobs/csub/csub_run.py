@@ -13,6 +13,7 @@ def checkstatus(cid):
     s = os.path.join(cmdstatus,cid)
     if os.path.exists(s):
         return 1
+    return 0
 
 def addstatus(cid):
     if not os.path.exists(cmdstatus):
@@ -22,6 +23,9 @@ def addstatus(cid):
     os.system(cmd)
 
 def run(cid,cmd,cmdfile,rerun=False,verbose=False):
+    info = """    exec... %s""" % cmd
+    print info
+
     s = 0
     status = "\033[1;33mfailed\033[0m"
     cid = cmdfile.split("/")[-1].split(".")[0]
@@ -31,6 +35,7 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
         status = "\033[1;32mpassed\033[0m"
     logfile = os.path.join(".log","%s.log"%cid)
     qcmd = '%s %s ' % (qsub_run,cmdfile)
+    jobid = None
     if not s:
         p = subprocess.Popen(qcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         p.wait()
@@ -41,17 +46,18 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
             s = int(s)
             if s:
                 s = 0
-                status = "\033[1;33mfailed\33[0m"
+                status = "\033[1;33mfailed\033[0m"
             else:
                 s = 1
-                status = "\033[1;32msuccess\33[0m"
+                status = "\033[1;32msuccess\033[0m"
                 addstatus(cid)
 
     info = """
-    exec... %s
+    finish... %s
         status: %s
+        jobid : %s
         logfile:%s
-        """ % (cmd,status,logfile)
+        """ % (cmd,status,jobid,logfile)
 
     if verbose:
         logcmd = "cat %s" % logfile
@@ -60,12 +66,13 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
         log = p.stdout.read()
         qsubfile = os.path.join(".task",cid+".qsub")
         info = """
-    exec... %s
+    finish... %s
         status: %s
         qsubfile: %s
+        jobid : %s
         logfile: %s
         details: %s
-        """ % (cmd,status,qsubfile,logfile,log)
+        """ % (cmd,status,qsubfile,jobid,logfile,log)
     print info
     return s
 
@@ -93,7 +100,7 @@ def parsecmd(cmdfile,cmdmem,rerun,debug):
     return torun
 
 def main(cmdfile,cmdmem,rerun,debug):
-    print "\nexecuting %s ..." % cmdfile
+    print "\nexecuting %s ...\n" % cmdfile
     torun = parsecmd(cmdfile,cmdmem,rerun,debug)
     pools = Pool(len(torun))
     ps = []

@@ -61,25 +61,28 @@ def execute_qsub(qsubfile):
 
 def status_qsub(jobid):
     cmd = "qacct -j %s" % jobid
+    cmdnull = "qacct -j %s 1>>/dev/null 2>>/dev/null" % jobid
+    os.system(cmdnull)
+    time.sleep(3)
+    os.system(cmdnull)
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
     stdinfo = p.stdout.read()
     steinfo = p.stderr.read()
     code1 = 1
-    code2 = 1
     for line in stdinfo.split("\n"):
         if line.startswith("exit_status"):
             code1 = int(line.split()[-1])
-        if line.startswith("failed"):
-            code2 = int(line.split()[-1])
+        #if line.startswith("failed"):
+        #    code2 = int(line.split()[-1])
     
     if code1 :
         return code1
-    if code2:
-        return code2
+    #if code2:
+    #    return code2
     
-    return 0
-    
+    return code1
+
 def qsub_run(cmdid,cmdmem,cmd):
     qsubfile,logfile = gen_qsub(cmdid,cmdmem,cmd) 
     jobid = execute_qsub(qsubfile)

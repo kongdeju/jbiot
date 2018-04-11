@@ -39,21 +39,17 @@ def dict2cmd(dic,cmdfile):
     
 class log:
     @staticmethod
-    def run(tag,cmd,i=[],o=[],para=1,mem="2G",docker='jbioi/alpine-dev',singularity='alpine-dev.img'):
+    def run(tag,cmd,i=[],o=[],cpu=1,para=1,mem="2G",docker='jbioi/alpine-dev',singularity='alpine-dev.img'):
         cmdfile =  hostname + ".cmd"
         iocmdfile =  hostname + ".ali.cmd"
         cmdict = load2dict(cmdfile)
         iocmdict = load2dict(iocmdfile)
-        tag = "#### %s: %s --para=%s --mem=%s --docker=%s --singularity=%s" % (main_name,tag,para,mem,docker,singularity)
-        icmd = "I=unknown"
-        if i == None:
-            icmd = "I=null"
+        tag = "#### %s: %s --para=%s --cpu=%s --mem=%s --docker=%s --singularity=%s" % (main_name,tag,para,cpu,mem,docker,singularity)
+        icmd = "I=null"
         if i:
             i = ",".join(i)
             icmd = "I=%s" % i
-        ocmd = "O=unknown"
-        if o == None:
-            ocmd = "O=null"
+        ocmd = "O=null"
         if o:
             o = ",".join(o)
             ocmd = "O=%s" % o
@@ -105,7 +101,7 @@ class log:
 def test_log():
     log.run("bwa align","bwa mem hg19.fq test.fq > out.sam")
     log.run("samtool align","bwa mem hg19.fq test.fq > out.sam")
-    log.run("1","bwa mem hg19.fq test.fq > out.sam",para=2)
+    log.run("1","bwa mem hg19.fq test.fq > out.sam",para=2,i=["ref","alt"],o=[])
 
 if __name__ == "__main__":
     test_log()

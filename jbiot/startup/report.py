@@ -10,6 +10,7 @@ from jbiot import jbiotWorker
 from jbiot import get_template
 from jbiot import yamladd
 import yaml
+import json
 
 def report(params):
     """ {{projName}} to markdown file and html file
@@ -26,7 +27,7 @@ def report(params):
     indict = yaml.load(open(yamlin))
 
     render_yml = "{{projName}}_render.yml"
-    cmd = "echo '%s' > %s" % (yaml.dump(open(yamlin).read()),render_yml)
+    cmd = "echo '%s' > %s" % (json.dumps(indict),render_yml)
 
     templ = get_template("{{projName}}")
     out = "{{projName}}.md"

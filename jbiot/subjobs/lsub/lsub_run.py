@@ -12,6 +12,7 @@ def checkstatus(cid):
     s = os.path.join(cmdstatus,cid)
     if os.path.exists(s):
         return 1
+    return 0
 
 def addstatus(cid):
     if not os.path.exists(cmdstatus):
@@ -21,15 +22,18 @@ def addstatus(cid):
     os.system(cmd)
 
 def run(cid,cmd,rerun=False,verbose=False):
+    info = """    exec... %s """ % cmd
+    print info
+
     s = 0
     if rerun:
         s = checkstatus(cid)
     if s:
-        status = "\033[1;32mpassed\0dd[0m"
+        status = "\033[1;32mpassed\033[0m"
     logdir = ".log"
     d = "mkdir -p %s" % logdir
     os.system(d)
-    logfile = os.path.join(logdir,cid)
+    logfile = os.path.join(logdir,cid+".log")
     fp = open(logfile,"w")
     if not s:
         p = subprocess.Popen(cmd,shell=True,stdout=fp,stderr=fp)
@@ -42,7 +46,7 @@ def run(cid,cmd,rerun=False,verbose=False):
             addstatus(cid)
 
     info = """
-    exec... %s
+    finish... %s
         status: %s
         logfile: %s
     """ % (cmd,status,logfile)
@@ -52,7 +56,7 @@ def run(cid,cmd,rerun=False,verbose=False):
         p.wait()
         log = p.stdout.read()
         info = """
-    exec... %s
+    finish... %s
         status: %s
         logfile: %s
         details: %s
@@ -73,7 +77,7 @@ def parsecmd(cmdfile,rerun,debug):
     return torun
 
 def main(cmdfile,threads,rerun,debug):
-    print "\nexecuting %s ..." % cmdfile
+    print "\nexecuting %s ...\n" % cmdfile
     torun = parsecmd(cmdfile,rerun,debug)
     pools = Pool(threads)
     ps = []

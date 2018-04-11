@@ -17,14 +17,16 @@ auth = oss2.Auth(key,secret)
 def osslist(ossdir,relobj):
     buc = ossdir[6:].split("/")[0]
     osspath = ossdir[6+len(buc)+1:]
-    osspath = os.path.join(osspath,relobj)
+    if relobj:
+        osspath = os.path.join(osspath,relobj)
     bucket = oss2.Bucket(auth,region,buc)
     objs = []
     for obj in oss2.ObjectIterator(bucket,osspath):
         ossobj = "oss://%s/%s" % (buc,obj.key)
         objs.append(ossobj)
     return objs
-#print osslist("oss://jbiobio/working","")    
+#print osslist("oss://jbiobio/working/oss2tools.py","")    
+#print osslist("oss://jbiobio/data/tmp","")
 
 def ossdirmapping(ossdir):
     ossdir = ossdir.rstrip("/")
@@ -132,28 +134,58 @@ def mapup(ossdir):
     for lf in touploads:
         ossupload(lf,ossdir)
   
+def reldown(ossdir,relfile):
+    ossdownload(ossdir,relfile)
 
-if __name__ == "__main__":
+def absdown(ossobj):
+    buc = ossobj[6:].split("/")[0]
+    Buc = oss2.Bucket(auth,region,buc)
+    objs = osslist(ossobj,"")
+    for obj in objs:
+        if obj.endswith("/"):
+            continue
+        osspath = obj[6+len(buc)+1:]
+        localfile = os.path.join("/tmp",buc,osspath)
+        localdir = localfile.rsplit("/",1)[0]
+        os.system("mkdir -p %s" % localdir)
+        res = Buc.get_object_to_file(osspath,localfile)
+
+if __name__ == "__mains__":
     from docopt import docopt
 
     usage = """
+
     Usage:
-        osstools.py mapdown <ossdir>
-        osstools.py mapup   <ossdir>
+        oss2tools.py mapdown   <ossdir>
+        oss2tools.py mapup     <ossdir>
+        oss2tools.py reldown   <ossdir> <relobj>
+        oss2tools.py absdown   <ossobj>    
+        oss2tools.py upload    <localobj> <ossobj>
+        oss2tools.py download  <ossobj> <localobj>
 
     Options:
         <ossdir>         ossdir in such format. oss://bucket/dir/
-    """
-    args = docopt(usage)
+        <relobj>         ossfile in relative path.
+        <ossobj>         ossobject.
+        <localobj>       local file or directory
 
+    """
+
+    args = docopt(usage)
     mapdownflag = args["mapdown"]
     mapupflag = args["mapup"]
-    ossdir = args["ossdir"]
+    reldownflag = args["reldown"]
+    absdownflag = args["absdown"]
+    ossdir = args["<ossdir>"]
+    relobj = args["<relobj>"]
+    absobj = args["<ossobj>"]
 
     if mapdownflag:
         mapdown(ossdir)
     if mapupflag:
         mapup(ossdir)
-
-
+    if reldownflag:
+        reldown(ossdir,relobj)
+    if absdownflag:
+        absdown(absobj)
 
