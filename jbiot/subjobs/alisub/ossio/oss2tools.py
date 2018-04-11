@@ -25,8 +25,9 @@ def osslist(ossdir,relobj):
         ossobj = "oss://%s/%s" % (buc,obj.key)
         objs.append(ossobj)
     return objs
+
 #print osslist("oss://jbiobio/working/oss2tools.py","")    
-#print osslist("oss://jbiobio/data/tmp","")
+#print osslist("oss://jbiobio/data/tmp/tmp","")
 
 def ossdirmapping(ossdir):
     ossdir = ossdir.rstrip("/")
@@ -48,23 +49,69 @@ def ossupload(localfile,ossdir):
     buc = oss2.Bucket(auth,region,buc)
     if not os.path.exists(localfile):
         return
+    
 
     if not os.path.isdir(localfile):
-        osspath = os.path.join(osspath,localfile)
+        objs = osslist(ossdir,"")
+        if ( objs and objs[0].endswith("/"))  or ossdir.endswith("/"): 
+            osspath = os.path.join(osspath,localfile)
+        else:
+            osspath = os.path.join(osspath)
         res = buc.put_object_from_file(osspath,localfile)
-        if res.status == 200:
-            msg = "Upload %s to %s successfully" % (localfile,osspath)
     else:
         for root,dirs,files in os.walk(localfile) :
             for f in files:
                 absfile = os.path.join(root,f)
                 osspath2 = os.path.join(osspath,absfile)
                 res = buc.put_object_from_file(osspath2,absfile)
-                if res.status == 200:
-                    msg = "Upload %s to %s successfully" % (localfile,osspath2)
 
 #ossupload("em","oss://jbiobio/working/")
-def ossdownload(ossdir,obj):
+#ossupload("oss2tools.py","oss://jbiobio/working/oss2tools.py")
+def ossdownload(ossdir,lf):
+    buc = ossdir[6:].split("/")[0]
+    Buc = oss2.Bucket(auth,region,buc)
+    objs = osslist(ossdir,"")
+    if not objs:
+        return
+
+    #ossobj is a file
+    if len(objs) == 1 and ( not objs[0].endswith("/")):
+        osspath = objs[0][6+len(buc)+1:]
+       
+        if lf.endswith("/"):
+            os.system("mkdir -p %s" % lf)
+        # lf is dir
+        if os.path.isdir(lf) :
+            filename = osspath.split("/")[-1]
+            localfile = os.path.join(lf,filename)
+            res = Buc.get_object_to_file(osspath,localfile)
+        # lf is file
+        else:
+            localfile = lf
+            res = Buc.get_object_to_file(osspath,localfile)
+
+    # ossobj is a dir
+    else:
+        for oj in objs:
+            osspath = oj[6+len(buc)+1:]
+            ossdir = ossdir.strip("/")
+            relpath = oj[len(ossdir)+1:]
+            localfile = os.path.join(lf,relpath)
+            ldir = localfile.rsplit("/",1)[0]
+            if relpath.endswith("/"):
+                os.system("mkdir -p %s" % ldir)
+                continue
+            if not relpath :
+                continue
+            os.system("mkdir -p %s" % ldir)
+            res = Buc.get_object_to_file(osspath,localfile)
+
+
+#ossdownload("oss://jbiobio/working/group1","test.py")
+#ossdownload("oss://jbiobio/working/group1",".")
+#ossdownload("oss://jbiobio/working/test","abc")
+
+def ossdownload2(ossdir,obj):
     buc = ossdir[6:].split("/")[0]
     Buc = oss2.Bucket(auth,region,buc)
     objs = osslist(ossdir,obj) 
@@ -78,8 +125,6 @@ def ossdownload(ossdir,obj):
             os.system(cmd)
         osspath = oj[6+len(buc)+1:]
         res = Buc.get_object_to_file(osspath,localfile)
-        if res.status == 200:
-            msg = "Download %s to %s successfully" % (oj,localfile)
 #ossdownload("oss://jbiobio/working","em")
 
 def ossprofile(ossdir):
@@ -107,6 +152,13 @@ def localprofile():
             absfile = os.path.join(root,f)
             size = os.path.getsize(absfile)
             profile[absfile[2:]] = size
+        for di in dirs:
+            absdir = os.path.join(root,di)
+            if not os.listdir(absdir):
+                cmd = "touch %s/.isadirectory" % absdir
+                os.system(cmd)
+                absfile = os.path.join(absdir,".isadirectory")
+                profile[absfile] = 0
     return profile
 
 #print localprofile()
@@ -133,9 +185,26 @@ def mapup(ossdir):
     touploads = checkdiff(ossdir)
     for lf in touploads:
         ossupload(lf,ossdir)
+
+#mapup("oss://jbiobio/working")
   
 def reldown(ossdir,relfile):
-    ossdownload(ossdir,relfile)
+    ossdownload2(ossdir,relfile)
+
+def relup(ossdir,localfile):
+    if not os.path.exists(localfile):
+        return
+    if os.path.isdir(localfile):
+        for root,dirs,files in os.walk(localfile):
+            for f in files:
+                absf = os.path.join(root,f)
+                ossupload(absf,ossdir)
+        for di in dirs:
+            absdir = os.path.join(root,di)
+            if not os.listdir(absdir):
+                cmd = "touch %s/.isadirectory" % absdir
+            absfile = os.path.join(absdir,".isadirectory")
+            ossupload(absfile,ossdir)
 
 def absdown(ossobj):
     buc = ossobj[6:].split("/")[0]
@@ -149,43 +218,4 @@ def absdown(ossobj):
         localdir = localfile.rsplit("/",1)[0]
         os.system("mkdir -p %s" % localdir)
         res = Buc.get_object_to_file(osspath,localfile)
-
-if __name__ == "__mains__":
-    from docopt import docopt
-
-    usage = """
-
-    Usage:
-        oss2tools.py mapdown   <ossdir>
-        oss2tools.py mapup     <ossdir>
-        oss2tools.py reldown   <ossdir> <relobj>
-        oss2tools.py absdown   <ossobj>    
-        oss2tools.py upload    <localobj> <ossobj>
-        oss2tools.py download  <ossobj> <localobj>
-
-    Options:
-        <ossdir>         ossdir in such format. oss://bucket/dir/
-        <relobj>         ossfile in relative path.
-        <ossobj>         ossobject.
-        <localobj>       local file or directory
-
-    """
-
-    args = docopt(usage)
-    mapdownflag = args["mapdown"]
-    mapupflag = args["mapup"]
-    reldownflag = args["reldown"]
-    absdownflag = args["absdown"]
-    ossdir = args["<ossdir>"]
-    relobj = args["<relobj>"]
-    absobj = args["<ossobj>"]
-
-    if mapdownflag:
-        mapdown(ossdir)
-    if mapupflag:
-        mapup(ossdir)
-    if reldownflag:
-        reldown(ossdir,relobj)
-    if absdownflag:
-        absdown(absobj)
 

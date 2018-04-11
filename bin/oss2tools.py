@@ -12,10 +12,12 @@ if __name__ == "__main__":
     Usage:
         oss2tools.py mapdown   <ossdir>
         oss2tools.py mapup     <ossdir>
-        oss2tools.py reldown   <ossdir> <relobj>
-        oss2tools.py absdown   <ossobj>    
-        oss2tools.py upload    <localobj> <ossobj>
         oss2tools.py download  <ossobj> <localobj>
+        oss2tools.py upload    <localobj> <ossobj>
+        oss2tools.py reldown   <ossdir> <relobj>
+        oss2tools.py relup     <ossdir> <localobj>
+        oss2tools.py absdown   <ossobj>   
+        oss2tools.py absup     <localobj> 
 
     Options:
         <ossdir>         ossdir in such format. oss://bucket/dir/
@@ -31,6 +33,9 @@ if __name__ == "__main__":
     absdownflag = args["absdown"]
     uploadflag = args["upload"]
     downloadflag = args["download"] 
+    relupflag = args["relup"]
+    absupflag = args["absup"]
+
 
     ossdir = args["<ossdir>"]
     relobj = args["<relobj>"]
@@ -47,4 +52,5 @@ if __name__ == "__main__":
         upload(localobj,ossobj) 
     if downloadflag:
         download(ossobj,localobj)   
- 
+    if relupflag :
+        relup(ossdir,localobj) 
