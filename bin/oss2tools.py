@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python
+#coding=utf-8
 import sys
 import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
