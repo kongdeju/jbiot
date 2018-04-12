@@ -236,7 +236,7 @@ def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
         cmd = "docker push localhost:8864/%s" % docker
         info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bcas sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
+    cmd = "bcs sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
@@ -283,7 +283,7 @@ def status_bc(cid,jobid):
 #status_bc("a","job-000000005ABA113000003043008F25EE")
 
 def cmd_run(cmdid,cmd,cpu,mem,docker=None,wdir=None):
-    localcmdfile,cmd = gen_lc(cmdid,cmd,wdir)
+    localcmdfile,cmd = gen_lc(cmdid,wdir,cmd)
     bccmdfile = gen_bc(cmdid,cmd,wdir)
     execute_lc(localcmdfile)
     jobid = execute_bc(bccmdfile,docker,cpu,mem)
