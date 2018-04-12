@@ -2,9 +2,15 @@ import hashlib
 from collections import OrderedDict
 import re
 import os
-mem_pat = re.compile("--mem[= ](\.+?) ")
+docker_pat = re.compile("--docker[= ](.+?) ")
+cpu_pat = re.compile("--cpu[= ](\d+?) ")
+mem_pat = re.compile("--mem[= ](.+?) ")
+
 
 def profilecmd(cmdfile):
+    docker = "jbioi/alpine-dev"
+    cpu = 1
+    mem = "2G"
     i = 1
     cmddict = {}
     content = ""
@@ -17,9 +23,12 @@ def profilecmd(cmdfile):
         if line.startswith("#"):
             taskname = "task-%s:%s" % (i,line) 
             mat = mem_pat.search(taskname)
-            mem = "2G"
             if mat: mem = mat.group(1)   
-            taskdict[taskname] = [mem]
+            mat = docker_pat.search(taskname) 
+            if mat: docker = mat.group(1)
+            mat = cpu_pat.search(taskname)
+            if mat: cpu = mat.group(1)
+            taskdict[taskname] = [[cpu,mem,docker]]
             i = i + 1
             continue
         cmd = line
@@ -36,13 +45,13 @@ def gentask(taskdict):
         taskname = 'task_%02d.cmd' % i
         taskname = os.path.join(tdir,taskname)
         fp = open(taskname,"w")
-        para = cmds[0]
+        cpu,mem,docker = cmds[0]
         for cmd in cmds[1:]:
             cmd = cmd + "\n"
             fp.write(cmd)
         fp.close()
         i = i + 1
-        tasks.append([taskname,para])
+        tasks.append([taskname,[cpu,mem,docker]])
     return tasks
 
 def stripcmd(cmdfile):

@@ -7,28 +7,10 @@ import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
 from jbiot.subjobs.dockersing import dockersing
-import glob
-import time
-import yaml
-import getpass
-from jbiot.subjobs.csub.jblog import readlog
-from jbiot.subjobs.jbmsg import *
 from jbiot.subjobs.csub.csub_strip import stripcmd
 from jbiot.subjobs.csub import csub_run 
-from jbiot.jbio.jmail import jmail
-from jbiot.subjobs.cmd2showdoc import cmd2showdoc
-
-def csub_email(cmdfile,email,name):
-    content = readlog(cmdfile)
-    if email :
-        setemail(email)
-    email = reademail()
-    if email:
-        if name:
-            subject = name
-            jmail(email,subject,content,)
-    if name:
-        cmd2showdoc(name,cmdfile)
+from jbiot.subjobs.jblog import jblog
+from jbiot.subjobs.jbmsg import jbmsg
 
 def csub(cmd,dry,rerun,verbose,force,email,name):
     tasks = stripcmd(cmd)
@@ -39,14 +21,12 @@ def csub(cmd,dry,rerun,verbose,force,email,name):
         mem = task[1]
         fail = csub_run.main(cmdfile,mem,rerun,verbose)
         if fail:
-            print "\033[1;31m"
-            print "contain failure,job should be stopped..."
-            print "\033[0m"
+            jblog("\033[1;31mcontain failure,job should be stopped...\033[0m")
             if not force:
-                csub_email(cmd,email,name)
+                jbmsg(cmd,email,name)
                 sys.exit(1)
-            print "\033[1;31mgo on execute cause force mode is set on...\033[0m"
-    csub_email(cmd,email,name)
+            jblog( "\033[1;31mgo on execute cause force mode is set on...\033[0m")
+    jbmsg(cmd,email,name)
 
 def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=False,force=False,timeout=-1):
     if docker :
@@ -62,6 +42,9 @@ if __name__ == "__main__":
     usage = """
     Usage:
         csub [options] <cmdfile> 
+
+    Description:
+        csub is used to submit cmdfile to sge compute cluster.
 
     Options:
         -h --help                print this screen

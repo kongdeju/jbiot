@@ -1,6 +1,8 @@
 import os
 import yaml
-
+from jblog import readlog
+from cmd2showdoc import cmd2showdoc
+from ..jbio.jmail import jmail
 def reademail():
     home = os.environ["HOME"]
     cfg = os.path.join(home,".lcsub","config.yml")
@@ -57,5 +59,30 @@ def setwechat(wechat):
     fp = open(cfg,"w")
     outstr = yaml.dump(infodict,default_flow_style=False)
     fp.write(outstr)
+
+
+def jbmsg(cmdfile,email,name):
+    
+    body = readlog()
+    if email:
+        setemail(email)
+
+    email = reademail()
+    if email and name:
+        jmail(email,name,body)
+
+    if name:
+        cmd2showdoc(name,cmdfile)
+
+
+
+
+
+
+
+
+
+
+
 
 

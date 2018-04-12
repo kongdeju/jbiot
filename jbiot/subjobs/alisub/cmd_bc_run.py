@@ -5,6 +5,18 @@ import subprocess
 import time
 import re
 from ossio.oss2tools import osslist
+import sys
+
+def infocmd(cmd):
+
+    sys.stderr.write(cmd + "\n")
+    p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    p.wait()
+    info1 = p.stdout.read()
+    info2 = p.stderr.read()
+    info = info1  + "\n" + info2 + "\n"
+    sys.stderr.write(info)
+
 
 def handlecmdio(cmd):
     todowns = []
@@ -100,7 +112,7 @@ def gen_lc(cid,cmd,wdir):
 
 def execute_lc(cmdfile):
     cmd = "sh %s" % cmdfile
-    print cmd
+    infocmd(cmd)
 
 def handle_input(fp,wdir,cmd):
     mcmd = "oss2tools.py mapdown %s" % wdir
@@ -217,14 +229,14 @@ def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
     dockerstr = ""
     if docker:
         cmd = "docker pull docker.io/%s" % docker
-        os.system(cmd)
+        info = infocmd(cmd)
         cmd = "docker tag %s localhost:8864/%s" % (docker,docker)
-        os.system(cmd)
+        info = infocmd(cmd)
         cmd = "docker push localhost:8864/%s" % docker
-        os.system(cmd)
+        info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bcs sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
-    print cmd
+    cmd = "bcs sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
+    sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
     info = p.stdout.read()
@@ -237,7 +249,6 @@ def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
 #execute_bc(".task/abc.cmd")
 
 def status_bc(cid,jobid):
-    
     status = 0
     cmd = "bcs job %s"
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -255,17 +266,18 @@ def status_bc(cid,jobid):
         os.system("mkdir -p %s" % ldir)
     logfile = cid + ".log"
     logfile = os.path.join(ldir,logfile)
-    fp = open(logfile,"w")
-
     cmd = "bcs log %s" % jobid
+    #infocmd(cmd)
+    fp = open(logfile,"a")
     p = subprocess.Popen(cmd,shell=True,stdout=fp,stderr=fp)
     p.wait()
     fp.close()
 
     return status,logfile
 
+#status_bc("a","job-000000005ABA113000003043008F25EE")
 
-def bc_run(cmdid,cmd,cpu,mem,wdir,docker=None):
+def cmd_run(cmdid,cmd,cpu,mem,docker=None,wdir=None):
     localcmdfile,cmd = gen_lc(cmdid,cmd,wdir)
     bccmdfile = gen_bc(cmdid,cmd,wdir)
     execute_lc(localcmdfile)
@@ -276,15 +288,27 @@ def bc_run(cmdid,cmd,cpu,mem,wdir,docker=None):
             break
         time.sleep(10)
     status,logfile = status_bc(cmdid,jobid)
+    print status,logfile,jobid
     return status,logfile,jobid
 
-print bc_run("abc","mkdir abc",2,"2G",wdir=None,docker=None)
-
 if __name__ == "__main__":
-    pass
+    from docopt import docopt
+    
+    usage = """
+    Usage:
+        cmd_bc_run.py [options] <cmdfile> 
 
+    Options:
+        --cpu=<cpu>        cpu nums want to use [default: 1]
+        --mem=<mem>        memory want to use [default: 2G]
+        --docker=<docker>  docker images wants to use [default: jbioi/alpine-dev]
 
-
-
-
-
+    """
+    args = docopt(usage)
+    cpu = args["--cpu"]
+    mem = args["--mem"]
+    docker = args["--docker"]
+    cmdfile = args["<cmdfile>"]
+    cmdid = cmdfile.split("/")[-1].split(".")[0]
+    cmd = open(cmdfile).readline().strip()
+    cmd_run(cmdid,cmd,cpu,mem,docker)

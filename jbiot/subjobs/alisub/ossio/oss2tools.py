@@ -1,4 +1,4 @@
-import oss2
+import  oss2
 import sys
 import os
 import yaml
@@ -8,11 +8,16 @@ def readinfo():
     infdict = yaml.load(open(inf).read()) 
     key = infdict["key"] 
     secret = infdict["secret"]
-    region = infdict["region"]  
+    region = infdict["region"]
+    try:
+        region = os.environ["BATCH_COMPUTE_OSS_HOST"]
+    except:
+        pass
     return key,secret,region
+
+
 key,secret,region = readinfo()
 auth = oss2.Auth(key,secret)
-
 
 def osslist(ossdir,relobj):
     buc = ossdir[6:].split("/")[0]
@@ -44,6 +49,7 @@ def ossdirmapping(ossdir):
 #ossdirmapping("oss://jbiobio/working/")
 
 def ossupload(localfile,ossdir):
+    
     buc = ossdir[6:].split("/")[0]
     osspath = ossdir[6+len(buc)+1:]
     buc = oss2.Bucket(auth,region,buc)
@@ -68,6 +74,7 @@ def ossupload(localfile,ossdir):
 #ossupload("em","oss://jbiobio/working/")
 #ossupload("oss2tools.py","oss://jbiobio/working/oss2tools.py")
 def ossdownload(ossdir,lf):
+
     buc = ossdir[6:].split("/")[0]
     Buc = oss2.Bucket(auth,region,buc)
     objs = osslist(ossdir,"")

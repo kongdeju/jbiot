@@ -7,34 +7,29 @@ import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
 from jbiot.subjobs.dockersing import dockersing
-from jbiot.subjobs.lsub.lsub_strip import stripcmd
-from jbiot.subjobs.lsub import lsub_run
+from jbiot.subjobs.alisub.asub_strip import stripcmd
+from jbiot.subjobs.alisub.task_bc_run import task_run
 from jbiot.subjobs.jblog import jblog
 from jbiot.subjobs.jbmsg import jbmsg
 
-def lsub(cmd,dry,rerun,verbose,force,email,name):
+def asub(cmd,dry,rerun,verbose,force,email,name):
     tasks = stripcmd(cmd)
     if dry:
         return
     for task in tasks:
         cmdfile = task[0]
-        para = task[1]
-        fail = lsub_run.main(cmdfile,para,rerun,verbose)
+        cpu,mem,docker = task[1]
+        fail = task_run(cmdfile,cpu,mem,docker,rerun,verbose)
         if fail:
             jblog("\033[1;31mcontain failure,job should be stopped...\033[0m")
             if not force:
                 jbmsg(cmd,email,name)
                 sys.exit(1)
-            jblog("\033[1;31mgo execute cause force mode is set on...\033[0m")
+            jblog("go execute cause force mode is set on...")
     jbmsg(cmd,email,name)
 
-
-def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=False,force=False,timeout=-1):
-    if docker :
-        cmdfile = dockersing(cmdfile,prefer="docker")
-    if sing:
-        cmdfile = dockersing(cmdfile,prefer="singularity")
-    lsub(cmdfile,dryflag,rerun,verbose,force,email,name) 
+def main(cmdfile,dryflag,email,name,rerun=False,verbose=False,force=False,timeout=-1):
+    asub(cmdfile,dryflag,rerun,verbose,force,email,name) 
 
 if __name__ == "__main__":
 
@@ -42,10 +37,12 @@ if __name__ == "__main__":
 
     usage = """
     Usage:
-        lsub [options] <cmdfile> 
+        asub [options] <cmdfile> 
 
-    Description:
-        lsub is used to submit cmdfile to local macheing.
+    Descption:
+        asub is used to submit cmdfile to aliyun batch compute service. 
+        docker images should contained in cmdfile. cause cmd is running in docker enviroments
+        if no docker image. cmdfile will use default docker image which is jbioi/alpine-dev:latest
 
     Options:
         -h --help                print this screen
@@ -53,8 +50,6 @@ if __name__ == "__main__":
         --rerun                  rerun the job from last failure point
         --force                  force run even error detected
         --verbose                verbose mode lot of information will print
-        --with-docker            prefer to use docker when run cmd
-        --with-singularity       prefer to user singularity when run cmd
         -e,--email=<email>       email of you want to remind of
         -w,--wechat=<name>       wechat name you want to send to
         -n,--name=<job_name>     the name of this task.
@@ -63,8 +58,6 @@ if __name__ == "__main__":
     args = docopt(usage)
     cmdfile = args["<cmdfile>"]
     dryflag = args["--dry"]
-    docker = args["--with-docker"]
-    sing = args["--with-singularity"]
     email = args["--email"]
     wechat = args["--wechat"]
     name = args["--name"]
@@ -72,5 +65,5 @@ if __name__ == "__main__":
     force = args["--force"]
     rerun = args["--rerun"]
     timeout = args["--timeout"]
-    main(cmdfile,dryflag,email,name,docker=docker,sing=sing,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
+    main(cmdfile,dryflag,email,name,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
     

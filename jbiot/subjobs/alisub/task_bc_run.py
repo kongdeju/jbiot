@@ -1,10 +1,12 @@
+#!/usr/bin/env python
+#coding=utf-8
 import os
 import yaml
 import hashlib
 import sys
 from multiprocessing import Pool,Process
 import subprocess
-qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),"qsub_run.py")
+qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),"cmd_bc_run.py")
 from ..jblog import jblog
 import signal
 import time
@@ -25,7 +27,7 @@ def addstatus(cid):
     cmd = "touch %s" % cp
     os.system(cmd)
 
-def run(cid,cmd,cmdfile,rerun=False,verbose=False):
+def run(cid,cmd,cmdfile,cpu,mem,docker,rerun=False,verbose=False):
     info = """    exec... %s""" % cmd
     jblog(info)
 
@@ -36,8 +38,12 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
         s = checkstatus(cid)
     if s:
         status = "\033[1;32mpassed\033[0m"
+    os.system("mkdir -p %s " % '.log')
     logfile = os.path.join(".log","%s.log"%cid)
-    qcmd = '%s %s ' % (qsub_run,cmdfile)
+    qcmd = '%s %s --cpu %s --mem %s --docker %s ' % (qsub_run,cmdfile,cpu,mem,docker)
+    fp = open(logfile,"a")
+    line = qcmd + "\n"
+    fp.write(line)
     jobid = None
     if not s:
         p = subprocess.Popen(qcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -48,13 +54,15 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
             s,logfile,jobid = stdinfo.strip().split()
             s = int(s)
             if s:
-                s = 0
-                status = "\033[1;33mfailed\033[0m"
-            else:
                 s = 1
                 status = "\033[1;32msuccess\033[0m"
                 addstatus(cid)
-
+            else:
+                s = 0
+                status = "\033[1;33mfailed\033[0m"
+    fp = open(logfile,"a")
+    fp.write(steinfo)
+    fp.close()
     info = """
     finish... %s
         status: %s
@@ -78,8 +86,7 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
         """ % (cmd,status,qsubfile,jobid,logfile,log)
     jblog(info)
     return s
-
-def parsecmd(cmdfile,cmdmem,rerun,debug):
+def parsecmd(cmdfile):
     fp = open(cmdfile)
     ct = cmdfile
     torun = []
@@ -94,26 +101,26 @@ def parsecmd(cmdfile,cmdmem,rerun,debug):
         cmdf = cid + ".cmd"
         cmdf = os.path.join(taskdir,cmdf)
         fp = open(cmdf,"w") 
-        line = cmdmem + "\n"
-        fp.write(line)
         line = cmd + "\n"
         fp.write(line)
         fp.close()
-        torun.append([cid,cmd,cmdf,rerun,debug])
+        torun.append([cid,cmd,cmdf])
     return torun
 
 def init_worker():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-def main(cmdfile,cmdmem,rerun,debug):
-    jblog("\nexecuting %s ...\n" % cmdfile)
-    torun = parsecmd(cmdfile,cmdmem,rerun,debug)
+def task_run(cmdfile,cpu,mem,docker,rerun,debug):
+    jblog( "\nexecuting %s ...\n" % cmdfile )
+    torun = parsecmd(cmdfile)
     pools = Pool(len(torun))
     ps = []
+    fail = 1
     for item in torun:
+        item.extend([cpu,mem,docker,rerun,debug])
         p = pools.apply_async(run,item) 
         ps.append(p)
-    fail = 1
+
     try:
         while True:
             time.sleep(5000)
@@ -131,6 +138,6 @@ def main(cmdfile,cmdmem,rerun,debug):
         suc = outs.count(1)
         fail = outs.count(0)
         jblog("%s failed,%s success" % (fail,suc))
-
+    
     return fail
 

@@ -4,6 +4,9 @@ import hashlib
 import sys
 from multiprocessing import Pool
 import subprocess
+from ..jblog import jblog
+import signal
+import time
 
 cmdstatus = ".status"
 def checkstatus(cid):
@@ -23,7 +26,7 @@ def addstatus(cid):
 
 def run(cid,cmd,rerun=False,verbose=False):
     info = """    exec... %s """ % cmd
-    print info
+    jblog(info)
 
     s = 0
     if rerun:
@@ -61,7 +64,7 @@ def run(cid,cmd,rerun=False,verbose=False):
         logfile: %s
         details: %s
         """ % (cmd,status,logfile,log)
-    print info
+    jblog(info)
     return s
 
 def parsecmd(cmdfile,rerun,debug):
@@ -76,24 +79,36 @@ def parsecmd(cmdfile,rerun,debug):
         torun.append([cid,cmd,rerun,debug])
     return torun
 
+def init_worker():
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
 def main(cmdfile,threads,rerun,debug):
-    print "\nexecuting %s ...\n" % cmdfile
+    jblog("\nexecuting %s ...\n" % cmdfile)
     torun = parsecmd(cmdfile,rerun,debug)
     pools = Pool(threads)
     ps = []
     for item in torun:
         p = pools.apply_async(run,item) 
         ps.append(p)
-    pools.close()
-    pools.join()
-    outs = []
-    for p in ps:
-        s = p.get()
-        outs.append(s)
-    suc = outs.count(1)
-    fail = outs.count(0)
-    print "%s failed,%s success" % (fail,suc)
-    
+    fail = 1
+    try:
+        while True:
+            time.sleep(5000)
+    except KeyboardInterrupt :
+        print "Stop job..."
+        pools.terminate()
+        pools.join()
+    else:
+        pools.close()
+        pools.join()
+        outs = []
+        for p in ps:
+            s = p.get()
+            outs.append(s)
+        suc = outs.count(1)
+        fail = outs.count(0)
+        jblog("%s failed,%s success" % (fail,suc))
+
     return fail
 
 if __name__ == "__main__":
