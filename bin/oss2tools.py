@@ -40,7 +40,9 @@ if __name__ == "__main__":
 
     ossdir = args["<ossdir>"]
     relobj = args["<relobj>"]
-    absobj = args["<ossobj>"]
+    ossobj = args["<ossobj>"]
+    localobj = args["<localobj>"]
+
     if mapdownflag:
         mapdown(ossdir)
     if mapupflag:
@@ -48,7 +50,7 @@ if __name__ == "__main__":
     if reldownflag:
         reldown(ossdir,relobj)
     if absdownflag:
-        absdown(absobj)
+        absdown(ossobj)
     if uploadflag:
         ossupload(localobj,ossobj) 
     if downloadflag:
