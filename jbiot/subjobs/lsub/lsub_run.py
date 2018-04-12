@@ -7,6 +7,7 @@ import subprocess
 from ..jblog import jblog
 import signal
 import time
+import psutil
 
 cmdstatus = ".status"
 def checkstatus(cid):
@@ -79,26 +80,28 @@ def parsecmd(cmdfile,rerun,debug):
         torun.append([cid,cmd,rerun,debug])
     return torun
 
+parent_id = os.getpid()
 def init_worker():
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    def sig_int(signal_num, frame):
+        parent = psutil.Process(parent_id)
+        for child in parent.children():
+            if child.pid != os.getpid():
+                child.kill()
+        parent.kill()
+        psutil.Process(os.getpid()).kill()
+    signal.signal(signal.SIGINT, sig_int)
+
 
 def main(cmdfile,threads,rerun,debug):
     jblog("\nexecuting %s ...\n" % cmdfile)
     torun = parsecmd(cmdfile,rerun,debug)
-    pools = Pool(threads)
-    ps = []
-    for item in torun:
-        p = pools.apply_async(run,item) 
-        ps.append(p)
+    pools = Pool(threads,init_worker)
     fail = 1
     try:
-        while True:
-            time.sleep(5000)
-    except KeyboardInterrupt :
-        print "Stop job..."
-        pools.terminate()
-        pools.join()
-    else:
+        ps = []
+        for item in torun:
+            p = pools.apply_async(run,item) 
+            ps.append(p)
         pools.close()
         pools.join()
         outs = []
@@ -108,6 +111,10 @@ def main(cmdfile,threads,rerun,debug):
         suc = outs.count(1)
         fail = outs.count(0)
         jblog("%s failed,%s success" % (fail,suc))
+    except KeyboardInterrupt :
+        print "Stop job..."
+        pools.terminate()
+        pools.join()
 
     return fail
 

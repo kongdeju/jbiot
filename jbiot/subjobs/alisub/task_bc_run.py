@@ -10,6 +10,7 @@ qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),"cmd_bc_run.p
 from ..jblog import jblog
 import signal
 import time
+import psutil
 
 cmdstatus = ".status"
 def checkstatus(cid):
@@ -107,28 +108,30 @@ def parsecmd(cmdfile):
         torun.append([cid,cmd,cmdf])
     return torun
 
+
+parent_id = os.getpid()
 def init_worker():
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    def sig_int(signal_num, frame):
+        parent = psutil.Process(parent_id)
+        for child in parent.children():
+            if child.pid != os.getpid():
+                child.kill()
+        parent.kill()
+        psutil.Process(os.getpid()).kill()
+    signal.signal(signal.SIGINT, sig_int)
+
 
 def task_run(cmdfile,cpu,mem,docker,rerun,debug):
     jblog( "\nexecuting %s ...\n" % cmdfile )
     torun = parsecmd(cmdfile)
-    pools = Pool(len(torun))
-    ps = []
+    pools = Pool(len(torun),init_worker)
     fail = 1
-    for item in torun:
-        item.extend([cpu,mem,docker,rerun,debug])
-        p = pools.apply_async(run,item) 
-        ps.append(p)
-
     try:
-        while True:
-            time.sleep(5000)
-    except KeyboardInterrupt :
-        print "Stop job..."
-        pools.terminate()
-        pools.join()
-    else:
+        ps = []
+        for item in torun:
+            item.extend([cpu,mem,docker,rerun,debug])
+            p = pools.apply_async(run,item) 
+            ps.append(p)
         pools.close()
         pools.join()
         outs = []
@@ -138,6 +141,11 @@ def task_run(cmdfile,cpu,mem,docker,rerun,debug):
         suc = outs.count(1)
         fail = outs.count(0)
         jblog("%s failed,%s success" % (fail,suc))
+
+    except KeyboardInterrupt :
+        print "Stop job..."
+        pools.terminate()
+        pools.join()
     
     return fail
 

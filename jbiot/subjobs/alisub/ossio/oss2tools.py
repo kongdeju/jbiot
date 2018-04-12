@@ -4,11 +4,11 @@ import os
 import yaml
 
 def readinfo():
-    inf = os.path.join(os.environ["HOME"],".lcsub","config.yml")
-    infdict = yaml.load(open(inf).read()) 
-    key = infdict["key"] 
-    secret = infdict["secret"]
-    region = infdict["region"]
+    #inf = os.path.join(os.environ["HOME"],".lcsub","config.yml")
+    #infdict = yaml.load(open(inf).read()) 
+    key = "QFmrMPB18qNx9KYc"
+    secret = "IuAdh4qL9noDf0UnMOO977HSgZSc0E"
+    region = "oss-cn-beijing.aliyuncs.com"
     try:
         region = os.environ["BATCH_COMPUTE_OSS_HOST"]
     except:
@@ -189,6 +189,8 @@ def mapdown(ossdir):
 
 
 def mapup(ossdir):
+    ossdir = ossdir.rstrip("/")
+    ossdir = ossdir + "/"
     touploads = checkdiff(ossdir)
     for lf in touploads:
         ossupload(lf,ossdir)

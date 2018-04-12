@@ -46,10 +46,12 @@ def check_qsub(jobid):
 
 def execute_qsub(qsubfile):
     cmd = "qsub %s" % qsubfile
+    sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
     stdinfo = p.stdout.read()
     steinfo = p.stderr.read()
+    sys.stderr.write(steinfo+"\n")
     if  steinfo:
         return None
     jobid = stdinfo.split()[2]

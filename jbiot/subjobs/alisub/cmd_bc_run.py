@@ -71,7 +71,7 @@ def checklocalandoss(fp,wdir,af):
                 fp.write(line)
     return af 
 
-def gen_lc(cid,cmd,wdir):
+def gen_lc(cid,wdir,cmd):
     if not wdir:
         wdir="oss://jbiobio/working/tmp"
 
@@ -109,6 +109,7 @@ def gen_lc(cid,cmd,wdir):
 
 #gen_lc("abc","oss://jbiobio/working/",'bwa mem -t 4 -R "RG\\tiullid" /tmp/reference oss://jbiobio/fq1 fq2')
 #gen_lc("abc","oss://jbiobio/working/",'bwa mem -t 4 -R "RG\\tiullid" /tmp/reference oss://jbiobio/fq1 fq2')
+#gen_lc("abc","oss://jbiobio/working/",'tar xvzf worker.tar.gz')
 
 def execute_lc(cmdfile):
     cmd = "sh %s" % cmdfile
@@ -213,7 +214,7 @@ def finish_bc(jobid):
     for line in lines:
         if line.startswith("JobName"):
             stat = line.split()[-1]
-            if stat == "(Waiting)":
+            if stat == "(Waiting)" or stat == "(Running)":
                 status = 0
     return status
 
@@ -235,11 +236,14 @@ def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
         cmd = "docker push localhost:8864/%s" % docker
         info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bcs sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
+    cmd = "bcas sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
     info = p.stdout.read()
+    steinfo = p.stderr.read()
+    sys.stderr.write(info+"\n")
+    sys.stderr.write(steinfo+"\n")
     lines = info.split("\n") 
     for line in lines:
         if line.startswith("Job created"):
@@ -267,11 +271,12 @@ def status_bc(cid,jobid):
     logfile = cid + ".log"
     logfile = os.path.join(ldir,logfile)
     cmd = "bcs log %s" % jobid
-    #infocmd(cmd)
-    fp = open(logfile,"a")
-    p = subprocess.Popen(cmd,shell=True,stdout=fp,stderr=fp)
-    p.wait()
-    fp.close()
+    time.sleep(2)
+    infocmd(cmd)
+    #fp = open(logfile,"a")
+    #p = subprocess.Popen(cmd,shell=True,stdout=fp,stderr=fp)
+    #p.wait()
+    #fp.close()
 
     return status,logfile
 
@@ -290,7 +295,6 @@ def cmd_run(cmdid,cmd,cpu,mem,docker=None,wdir=None):
     status,logfile = status_bc(cmdid,jobid)
     print status,logfile,jobid
     return status,logfile,jobid
-
 if __name__ == "__main__":
     from docopt import docopt
     

@@ -8,6 +8,7 @@ qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),"qsub_run.py"
 from ..jblog import jblog
 import signal
 import time
+import psutil
 
 cmdstatus = ".status"
 def checkstatus(cid):
@@ -38,6 +39,9 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
         status = "\033[1;32mpassed\033[0m"
     logfile = os.path.join(".log","%s.log"%cid)
     qcmd = '%s %s ' % (qsub_run,cmdfile)
+    fp = open(logfile,"w")
+    fp.write(qcmd+"\n")
+    fp.close()
     jobid = None
     if not s:
         p = subprocess.Popen(qcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -54,6 +58,9 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
                 s = 1
                 status = "\033[1;32msuccess\033[0m"
                 addstatus(cid)
+        fp = open(logfile,"a")
+        fp.write(steinfo)
+        fp.close()
 
     info = """
     finish... %s
@@ -102,26 +109,28 @@ def parsecmd(cmdfile,cmdmem,rerun,debug):
         torun.append([cid,cmd,cmdf,rerun,debug])
     return torun
 
+parent_id = os.getpid()
 def init_worker():
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    def sig_int(signal_num, frame):
+        parent = psutil.Process(parent_id)
+        for child in parent.children():
+            if child.pid != os.getpid():
+                child.kill()
+        parent.kill()
+        psutil.Process(os.getpid()).kill()
+    signal.signal(signal.SIGINT, sig_int)
+
 
 def main(cmdfile,cmdmem,rerun,debug):
     jblog("\nexecuting %s ...\n" % cmdfile)
     torun = parsecmd(cmdfile,cmdmem,rerun,debug)
-    pools = Pool(len(torun))
-    ps = []
-    for item in torun:
-        p = pools.apply_async(run,item) 
-        ps.append(p)
+    pools = Pool(len(torun),init_worker)
     fail = 1
     try:
-        while True:
-            time.sleep(5000)
-    except KeyboardInterrupt :
-        print "Stop job..."
-        pools.terminate()
-        pools.join()
-    else:
+        ps = []
+        for item in torun:
+            p = pools.apply_async(run,item) 
+            ps.append(p)
         pools.close()
         pools.join()
         outs = []
@@ -131,6 +140,10 @@ def main(cmdfile,cmdmem,rerun,debug):
         suc = outs.count(1)
         fail = outs.count(0)
         jblog("%s failed,%s success" % (fail,suc))
+    except KeyboardInterrupt :
+        print "Stop job..."
+        pools.terminate()
+        pools.join()
 
     return fail
 
