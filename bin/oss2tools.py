@@ -50,8 +50,8 @@ if __name__ == "__main__":
     if absdownflag:
         absdown(absobj)
     if uploadflag:
-        upload(localobj,ossobj) 
+        ossupload(localobj,ossobj) 
     if downloadflag:
-        download(ossobj,localobj)   
+        ossdownload(ossobj,localobj)   
     if relupflag :
         relup(ossdir,localobj) 
