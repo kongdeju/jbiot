@@ -9,6 +9,7 @@ def status_run(cmdfile):
     os.system(cmd)
     logdir = ".log"
     cmd = "mkdir -p %s" % logdir
+    os.system(cmd)
     logfile = os.path.join(logdir,cid+".log")
 
     cmd = "sh %s " % cmdfile
