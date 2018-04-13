@@ -18,8 +18,8 @@ def csub(cmd,dry,rerun,verbose,force,email,name):
         return
     for task in tasks:
         cmdfile = task[0]
-        mem = task[1]
-        fail = csub_run.main(cmdfile,mem,rerun,verbose)
+        mem,cpu = task[1]
+        fail = csub_run.main(cmdfile,mem,cpu,rerun,verbose)
         if fail:
             jblog("\033[1;31mcontain failure,job should be stopped...\033[0m")
             if not force:

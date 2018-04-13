@@ -212,14 +212,16 @@ def finish_bc(jobid):
                 status = 0
     return status
 
-def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
+def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
     
     img = "img-ubuntu"
-    tp = "ecs.se1.xlarge"
-   
-    jobname = cmdfile.split("/")[-1].split(".")[0]
+    tp = "ecs.sn1ne.large"
+    disk = "system:default:40"  
     timeout = 21600
     vpc = "192.168.0.0/16"
+ 
+    jobname = cmdfile.split("/")[-1].split(".")[0]
+    jobname = "asub-" + jobname
     jobid = None
     dockerstr = ""
     if docker:
@@ -230,7 +232,7 @@ def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
         cmd = "docker push localhost:8864/%s" % docker
         info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bcs sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
+    cmd = "bcs sub 'status_run.py %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin  -p %s "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,disk,timeout,cmdfile)
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
@@ -246,53 +248,39 @@ def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
 
 #execute_bc(".task/abc.cmd")
 
-def status_bc(cid,jobid):
+def status_bc(wdir,cid):
     status = 0
-    cmd = "bcs job %s" % jobid
-    p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    p.wait()
-    info = p.stdout.read()
-    lines = info.split("\n")
-    for line in lines:
-        if line.startswith("| Id"):
-            stat = line.strip("\n").strip("|").split("|")[-1].strip().split(":")[-1].strip()
-            if stat == "Finished":
-                status = 1
-
-    ldir = ".log"
-    if not os.path.exists(ldir):
-        os.system("mkdir -p %s" % ldir)
-    logfile = cid + ".log"
-    logfile = os.path.join(ldir,logfile)
-    cmd = "bcs log %s" % jobid
-    time.sleep(2)
+    osstatus = os.path.join(wdir,".status",cid+".status")
+    osslog = os.path.join(wdir,".log",cid+".log")
+    cmd = "oss2tools.py download %s  .status/" % (osstatus)
     infocmd(cmd)
-    #fp = open(logfile,"a")
-    #p = subprocess.Popen(cmd,shell=True,stdout=fp,stderr=fp)
-    #p.wait()
-    #fp.close()
+    cmd = "oss2tools.py download %s  .log/" % (osslog)
+    infocmd(cmd)
+    lstatus = os.path.join(".status",cid+".status") 
+    if os.path.exists(lstatus):
+        status = 1
+    log = os.path.join(".log",cid+".log") 
+    return status,log
 
-    return status,logfile
-
-#print status_bc("a","job-000000005ACF133E00002E700000DC20")
+#print status_bc("oss://jbiobio/working/tmp/a","a")
 
 def cmd_run(cmdid,cmd,cpu,mem,docker=None,wdir=None):
     if not wdir:
         ftime = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
         wdir = "oss://jbiobio/working/tmp/%s/" % ftime
-
     localcmdfile,cmd = gen_lc(cmdid,wdir,cmd)
     bccmdfile = gen_bc(cmdid,cmd,wdir)
     execute_lc(localcmdfile)
-    jobid = execute_bc(bccmdfile,docker,cpu,mem)
+    jobid = execute_bc(wdir,bccmdfile,docker,cpu,mem)
     while True:
         finish = finish_bc(jobid)
         if finish:
             break
         time.sleep(10)
-    status,logfile = status_bc(cmdid,jobid)
+    status,logfile = status_bc(wdir,cmdid)
     print status,logfile,jobid
     return status,logfile,jobid
+
 if __name__ == "__main__":
     from docopt import docopt
     

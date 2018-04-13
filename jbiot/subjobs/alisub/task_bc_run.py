@@ -58,7 +58,7 @@ def run(cid,cmd,cmdfile,cpu,mem,docker,rerun=False,verbose=False):
     os.system("mkdir -p %s " % '.log')
     logfile = os.path.join(".log","%s.log"%cid)
     qcmd = '%s %s --cpu %s --mem %s --docker %s ' % (qsub_run,cmdfile,cpu,mem,docker)
-    fp = open(logfile,"a")
+    fp = open(logfile,"w")
     line = qcmd + "\n"
     fp.write(line)
     jobid = None

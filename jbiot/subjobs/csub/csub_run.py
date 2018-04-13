@@ -20,25 +20,23 @@ def getscript(script):
         qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),script)
     return qsub_run
 
-qsub_run = getscript("qsub_run.py")
-
+qsub_run = getscript("cmd_qsub_run.py")
 cmdstatus = ".status"
 def checkstatus(cid):
     if not os.path.exists(cmdstatus):
         os.mkdir(cmdstatus)
-    s = os.path.join(cmdstatus,cid)
+    s = os.path.join(cmdstatus,cid+".status")
     if os.path.exists(s):
         return 1
     return 0
 
-def addstatus(cid):
-    if not os.path.exists(cmdstatus):
-        os.mkdir(cmdstatus)
-    cp = os.path.join(cmdstatus,cid)
-    cmd = "touch %s" % cp
-    os.system(cmd)
 
-def run(cid,cmd,cmdfile,rerun=False,verbose=False):
+def run(cmdfile,mem,cpu,rerun,verbose):
+ 
+    cid = cmdfile.split("/")[-1].split(".")[0]
+    cmd = open(cmdfile).read().strip("\n")
+    jobid = None
+    
     info = """    exec... %s""" % cmd
     if verbose:
         info = """    exec... %s
@@ -47,7 +45,6 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
 
     s = 0
     status = "\033[1;33mfailed\033[0m"
-    cid = cmdfile.split("/")[-1].split(".")[0]
     if rerun:
         s = checkstatus(cid)
     if s:
@@ -57,7 +54,6 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
     fp = open(logfile,"w")
     fp.write(qcmd+"\n")
     fp.close()
-    jobid = None
     if not s:
         p = subprocess.Popen(qcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         p.wait()
@@ -67,12 +63,11 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
             s,logfile,jobid = stdinfo.strip().split()
             s = int(s)
             if s:
-                s = 0
-                status = "\033[1;33mfailed\033[0m"
-            else:
                 s = 1
                 status = "\033[1;32msuccess\033[0m"
-                addstatus(cid)
+            else:
+                s = 0
+                status = "\033[1;33mfailed\033[0m"
         fp = open(logfile,"a")
         fp.write(steinfo)
         fp.close()
@@ -101,7 +96,7 @@ def run(cid,cmd,cmdfile,rerun=False,verbose=False):
     jblog(info)
     return s
 
-def parsecmd(cmdfile,cmdmem,rerun,debug):
+def parsecmd(cmdfile):
     fp = open(cmdfile)
     ct = cmdfile
     torun = []
@@ -116,12 +111,10 @@ def parsecmd(cmdfile,cmdmem,rerun,debug):
         cmdf = cid + ".cmd"
         cmdf = os.path.join(taskdir,cmdf)
         fp = open(cmdf,"w") 
-        line = cmdmem + "\n"
-        fp.write(line)
         line = cmd + "\n"
         fp.write(line)
         fp.close()
-        torun.append([cid,cmd,cmdf,rerun,debug])
+        torun.append(cmdf)
     return torun
 
 parent_id = os.getpid()
@@ -136,15 +129,15 @@ def init_worker():
     signal.signal(signal.SIGINT, sig_int)
 
 
-def main(cmdfile,cmdmem,rerun,debug):
+def main(cmdfile,mem,cpu,rerun,verbose):
     jblog("\nexecuting %s ...\n" % cmdfile)
-    torun = parsecmd(cmdfile,cmdmem,rerun,debug)
-    pools = Pool(len(torun),init_worker)
+    cmdfiles = parsecmd(cmdfile)
+    pools = Pool(len(cmdfiles),init_worker)
     fail = 1
     try:
         ps = []
-        for item in torun:
-            p = pools.apply_async(run,item) 
+        for cmdfile in cmdfiles:
+            p = pools.apply_async(run,(cmdfile,mem,cpu,rerun,verbose)) 
             ps.append(p)
         pools.close()
         pools.join()
