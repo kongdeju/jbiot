@@ -225,14 +225,14 @@ def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
     jobid = None
     dockerstr = ""
     if docker:
-        cmd = "docker pull docker.io/%s" % docker
+        cmd = "docker run --rm %s echo " % docker
         info = infocmd(cmd)
         cmd = "docker tag %s localhost:8864/%s" % (docker,docker)
         info = infocmd(cmd)
         cmd = "docker push localhost:8864/%s" % docker
         info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bcs sub 'status_run.py %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin  -p %s "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,disk,timeout,cmdfile)
+    cmd = "bcs sub 'status_run.py %s -w %s ' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin  -p %s "  % (cmdfile.split("/")[-1],wdir,jobname,img,tp,vpc,dockerstr,disk,timeout,cmdfile)
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
@@ -250,13 +250,15 @@ def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
 
 def status_bc(wdir,cid):
     status = 0
+    lstatus = os.path.join(".status",cid+".status")
+    cmd = "rm -f %s" % lstatus
+    infocmd(cmd) 
     osstatus = os.path.join(wdir,".status",cid+".status")
     osslog = os.path.join(wdir,".log",cid+".log")
     cmd = "oss2tools.py download %s  .status/" % (osstatus)
     infocmd(cmd)
     cmd = "oss2tools.py download %s  .log/" % (osslog)
     infocmd(cmd)
-    lstatus = os.path.join(".status",cid+".status") 
     if os.path.exists(lstatus):
         status = 1
     log = os.path.join(".log",cid+".log") 

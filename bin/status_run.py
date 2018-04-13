@@ -15,15 +15,17 @@ if __name__ == "__main__":
 
     Usage = """
     Usage:
-        status_run.py <cmd>
+        status_run.py [options] <cmd>
 
     Description:
         run cmdfile with sh. and return codefile in .status dicectory.
 
     Options:
-        cmd            cmd file in bash format
+        cmd             cmd file in bash format
+        -w,--dir=dir    oss working directory  
 
     """
     args = docopt(Usage)
     cmd = args["<cmd>"]
-    print status_run(cmd)
+    wdir = args["--dir"]
+    status_run(cmd,wdir)
