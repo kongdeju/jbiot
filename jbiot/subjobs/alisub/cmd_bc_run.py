@@ -72,8 +72,6 @@ def checklocalandoss(fp,wdir,af):
     return af 
 
 def gen_lc(cid,wdir,cmd):
-    if not wdir:
-        wdir="oss://jbiobio/working/tmp"
 
     ins,outs,cmd = handlecmdio(cmd)
     tdir = ".task"
@@ -179,17 +177,13 @@ def handle_output(fp,wdir,cmd):
         line = cmd + "\n"
         fp.write(cmd)
 
-def gen_bc(cmdid,execcmd,wdir="oss://jbiobio/working/tmp"):
+def gen_bc(cmdid,execcmd,wdir):
     tdir = ".task"
     if not os.path.exists(tdir):
         os.system("mkdir -p %s" % tdir)    
     cmdfile = cmdid + ".bc.cmd" 
     cmdfile = os.path.join(tdir,cmdfile)
     fp = open(cmdfile,"w")
-    ftime = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
-    # ossdirmapping
-    if not wdir:
-        wdir = "oss://jbiobio/working/tmp/%s" % ftime
 
     # handle inputs
     handle_input(fp,wdir,execcmd)
@@ -236,7 +230,7 @@ def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
         cmd = "docker push localhost:8864/%s" % docker
         info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bcs sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
+    cmd = "bacs sub 'sh %s' %s -i %s -t %s --vpc_cidr_block %s %s --disk system:default:500 --timeout=%s -p %s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cmdfile.split("/")[-1],jobname,img,tp,vpc,dockerstr,timeout,cmdfile)
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
@@ -254,14 +248,14 @@ def execute_bc(cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
 
 def status_bc(cid,jobid):
     status = 0
-    cmd = "bcs job %s"
+    cmd = "bcs job %s" % jobid
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
     info = p.stdout.read()
     lines = info.split("\n")
     for line in lines:
         if line.startswith("| Id"):
-            stat = line.strip("\n").strip("|").split("|")[-1].strip().split(":")[-1]
+            stat = line.strip("\n").strip("|").split("|")[-1].strip().split(":")[-1].strip()
             if stat == "Finished":
                 status = 1
 
@@ -280,9 +274,13 @@ def status_bc(cid,jobid):
 
     return status,logfile
 
-#status_bc("a","job-000000005ABA113000003043008F25EE")
+#print status_bc("a","job-000000005ACF133E00002E700000DC20")
 
 def cmd_run(cmdid,cmd,cpu,mem,docker=None,wdir=None):
+    if not wdir:
+        ftime = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
+        wdir = "oss://jbiobio/working/tmp/%s/" % ftime
+
     localcmdfile,cmd = gen_lc(cmdid,wdir,cmd)
     bccmdfile = gen_bc(cmdid,cmd,wdir)
     execute_lc(localcmdfile)

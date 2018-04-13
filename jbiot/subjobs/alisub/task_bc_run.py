@@ -6,11 +6,24 @@ import hashlib
 import sys
 from multiprocessing import Pool,Process
 import subprocess
-qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),"cmd_bc_run.py")
 from ..jblog import jblog
 import signal
 import time
 import psutil
+
+def getscript(script):
+    p = subprocess.Popen('which %s' % script ,shell=True,stdout=subprocess.PIPE)
+    p.wait()
+    info = p.stdout.read()
+    info = info.strip()
+    if info:
+        qsub_run = script
+    else:
+        qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),script)
+    return qsub_run
+
+qsub_run = getscript("cmd_bc_run.py")
+
 
 cmdstatus = ".status"
 def checkstatus(cid):
@@ -30,6 +43,9 @@ def addstatus(cid):
 
 def run(cid,cmd,cmdfile,cpu,mem,docker,rerun=False,verbose=False):
     info = """    exec... %s""" % cmd
+    if verbose:
+        info = """    exec... %s
+        %s """ % ( cmd,os.path.join(".log",cid+".log"))
     jblog(info)
 
     s = 0

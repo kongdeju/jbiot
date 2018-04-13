@@ -59,7 +59,10 @@ def ossupload(localfile,ossdir):
 
     if not os.path.isdir(localfile):
         objs = osslist(ossdir,"")
-        if ( objs and objs[0].endswith("/"))  or ossdir.endswith("/"): 
+        prefix = None
+        if objs:
+            prefix = objs[0][:len(ossdir)]
+        if ( prefix == ossdir)  or ossdir.endswith("/"): 
             osspath = os.path.join(osspath,localfile)
         else:
             osspath = os.path.join(osspath)
@@ -119,20 +122,20 @@ def ossdownload(ossdir,lf):
 #ossdownload("oss://jbiobio/working/test","abc")
 
 def ossdownload2(ossdir,obj):
+    ossdir = ossdir.rstrip("/") + "/"
     buc = ossdir[6:].split("/")[0]
     Buc = oss2.Bucket(auth,region,buc)
     objs = osslist(ossdir,obj) 
     for oj in objs:
         if oj.endswith("/"):
             continue
-        localfile = oj[len(ossdir)+1:]
+        localfile = oj[len(ossdir):]
         if "/" in localfile:
             localdir = localfile.rsplit("/",1)[0]
             cmd = "mkdir -p %s" % localdir
             os.system(cmd)
         osspath = oj[6+len(buc)+1:]
         res = Buc.get_object_to_file(osspath,localfile)
-#ossdownload("oss://jbiobio/working","em")
 
 def ossprofile(ossdir):
     buc = ossdir[6:].split("/")[0]

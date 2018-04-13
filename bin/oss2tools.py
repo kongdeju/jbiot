@@ -11,6 +11,7 @@ if __name__ == "__main__":
     from docopt import docopt
     usage = """
     Usage:
+        oss2tools.py list      <ossdir>
         oss2tools.py mapdown   <ossdir>
         oss2tools.py mapup     <ossdir>
         oss2tools.py download  <ossobj> <localobj>
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     downloadflag = args["download"] 
     relupflag = args["relup"]
     absupflag = args["absup"]
+    listflag = args["list"]
 
 
     ossdir = args["<ossdir>"]
@@ -57,3 +59,6 @@ if __name__ == "__main__":
         ossdownload(ossobj,localobj)   
     if relupflag :
         relup(ossdir,localobj) 
+    if listflag :
+        print osslist(ossdir,"")
+

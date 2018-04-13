@@ -3,6 +3,7 @@
 import os
 import subprocess
 import time
+import sys
 
 def gen_qsub(cmdid,mem,cmd):
     logdir = ".log"

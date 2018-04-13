@@ -26,7 +26,10 @@ def addstatus(cid):
     os.system(cmd)
 
 def run(cid,cmd,rerun=False,verbose=False):
-    info = """    exec... %s """ % cmd
+    info = """    exec... %s""" % cmd
+    if verbose:
+        info = """    exec... %s
+        %s """ % ( cmd,os.path.join(".log",cid+".log"))
     jblog(info)
 
     s = 0
