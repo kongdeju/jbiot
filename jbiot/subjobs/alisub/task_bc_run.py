@@ -41,7 +41,7 @@ def addstatus(cid):
     cmd = "touch %s" % cp
     os.system(cmd)
 
-def run(cid,cmd,cmdfile,cpu,mem,docker,rerun=False,verbose=False):
+def run(cid,cmd,cmdfile,cpu,mem,wdir,docker,rerun=False,verbose=False):
     info = """    exec... %s""" % cmd
     if verbose:
         info = """    exec... %s
@@ -57,7 +57,7 @@ def run(cid,cmd,cmdfile,cpu,mem,docker,rerun=False,verbose=False):
         status = "\033[1;32mpassed\033[0m"
     os.system("mkdir -p %s " % '.log')
     logfile = os.path.join(".log","%s.log"%cid)
-    qcmd = '%s %s --cpu %s --mem %s --docker %s ' % (qsub_run,cmdfile,cpu,mem,docker)
+    qcmd = '%s %s --wdir %s --cpu %s --mem %s --docker %s ' % (qsub_run,cmdfile,wdir,cpu,mem,docker)
     fp = open(logfile,"w")
     line = qcmd + "\n"
     fp.write(line)
@@ -137,7 +137,7 @@ def init_worker():
     signal.signal(signal.SIGINT, sig_int)
 
 
-def task_run(cmdfile,cpu,mem,docker,rerun,debug):
+def task_run(cmdfile,cpu,mem,wdir,docker,rerun,debug):
     jblog( "\nexecuting %s ...\n" % cmdfile )
     torun = parsecmd(cmdfile)
     pools = Pool(len(torun),init_worker)
@@ -145,7 +145,7 @@ def task_run(cmdfile,cpu,mem,docker,rerun,debug):
     try:
         ps = []
         for item in torun:
-            item.extend([cpu,mem,docker,rerun,debug])
+            item.extend([cpu,mem,wdir,docker,rerun,debug])
             p = pools.apply_async(run,item) 
             ps.append(p)
         pools.close()

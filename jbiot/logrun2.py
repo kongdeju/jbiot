@@ -45,11 +45,11 @@ class log:
         cmdict = load2dict(cmdfile)
         iocmdict = load2dict(iocmdfile)
         tag = "#### %s: %s --para=%s --cpu=%s --mem=%s --docker=%s --singularity=%s" % (main_name,tag,para,cpu,mem,docker,singularity)
-        icmd = "I=null"
+        icmd = ""
         if i:
             i = ",".join(i)
             icmd = "I=%s" % i
-        ocmd = "O=null"
+        ocmd = ""
         if o:
             o = ",".join(o)
             ocmd = "O=%s" % o

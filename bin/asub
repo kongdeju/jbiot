@@ -4,6 +4,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 import os
+import time
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
 from jbiot.subjobs.dockersing import dockersing
@@ -13,14 +14,14 @@ from jbiot.subjobs.jblog import jblog
 from jbiot.subjobs.jbmsg import jbmsg
 from jbiot.subjobs.alisub.checkbcs import checkbcs,checkdcs
 
-def asub(cmd,dry,rerun,verbose,force,email,name):
+def asub(cmd,dry,wdir,rerun,verbose,force,email,name):
     tasks = stripcmd(cmd)
     if dry:
         return
     for task in tasks:
         cmdfile = task[0]
         cpu,mem,docker = task[1]
-        fail = task_run(cmdfile,cpu,mem,docker,rerun,verbose)
+        fail = task_run(cmdfile,cpu,mem,wdir,docker,rerun,verbose)
         if fail:
             jblog("\033[1;31mcontain failure,job should be stopped...\033[0m")
             if not force:
@@ -33,7 +34,9 @@ def main(cmdfile,dryflag,email,name,rerun=False,verbose=False,force=False,timeou
     bcs =  checkbcs()
     dcs = checkdcs()
     if bcs and dcs:
-        asub(cmdfile,dryflag,rerun,verbose,force,email,name) 
+        ftime = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
+        wdir = "oss://jbiobio/working/tmp/%s/" % ftime
+        asub(cmdfile,dryflag,wdir,rerun,verbose,force,email,name) 
 
 
 if __name__ == "__main__":

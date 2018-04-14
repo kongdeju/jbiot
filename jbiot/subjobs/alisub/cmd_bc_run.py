@@ -117,6 +117,8 @@ def gen_lc(cid,wdir,cmd):
             else:
                 nit = checklocalandoss(fp,wdir,it)
                 cmditems[i] = nit
+    tcmd = "oss2tools.py upload .task/ %s" % wdir
+    fp.write(tcmd+"\n") 
     fp.close()
     cmd = " ".join(cmditems)
     return cmdfile,cmd
@@ -252,8 +254,8 @@ def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
     timeout = 21600
     vpc = "192.168.0.0/16"
  
-    jobname = cmdfile.split("/")[-1].split(".")[0]
-    jobname = "asub-" + jobname
+    cid = cmdfile.split("/")[-1].split(".")[0]
+    jobname = "asub-" + cid
     jobid = None
     dockerstr = ""
     if docker:
@@ -264,7 +266,7 @@ def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
         cmd = "docker push localhost:8864/%s" % docker
         info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bcs sub 'status_run.py %s -w %s ' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin  -p %s "  % (cmdfile.split("/")[-1],wdir,jobname,img,tp,vpc,dockerstr,disk,timeout,cmdfile)
+    cmd = "bcs sub 'status_run.py %s -w %s ' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin  -p %s "  % (cid,wdir,jobname,img,tp,vpc,dockerstr,disk,timeout,cmdfile)
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
@@ -302,10 +304,7 @@ def status_bc(wdir,cid,jobid):
 
 #print status_bc("oss://jbiobio/working/tmp/a","a")
 
-def cmd_run(cmdid,cmd,cpu,mem,docker=None,wdir=None):
-    if not wdir:
-        ftime = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
-        wdir = "oss://jbiobio/working/tmp/%s/" % ftime
+def cmd_run(cmdid,cmd,wdir,cpu,mem,docker):
     localcmdfile,cmd = gen_lc(cmdid,wdir,cmd)
     bccmdfile = gen_bc(cmdid,cmd,wdir)
     execute_lc(localcmdfile)
@@ -327,6 +326,7 @@ if __name__ == "__main__":
         cmd_bc_run.py [options] <cmdfile> 
 
     Options:
+        --wdir=<wdir>      oss working directory
         --cpu=<cpu>        cpu nums want to use [default: 1]
         --mem=<mem>        memory want to use [default: 2G]
         --docker=<docker>  docker images wants to use [default: jbioi/alpine-dev]
@@ -334,9 +334,10 @@ if __name__ == "__main__":
     """
     args = docopt(usage)
     cpu = args["--cpu"]
+    wdir = args["--wdir"]
     mem = args["--mem"]
     docker = args["--docker"]
     cmdfile = args["<cmdfile>"]
     cmdid = cmdfile.split("/")[-1].split(".")[0]
     cmd = open(cmdfile).readline().strip()
-    cmd_run(cmdid,cmd,cpu,mem,docker)
+    cmd_run(cmdid,cmd,wdir,cpu,mem,docker)

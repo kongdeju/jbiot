@@ -68,11 +68,28 @@ def ossupload(localfile,ossdir):
             osspath = os.path.join(osspath)
         res = buc.put_object_from_file(osspath,localfile)
     else:
-        for root,dirs,files in os.walk(localfile) :
-            for f in files:
-                absfile = os.path.join(root,f)
-                osspath2 = os.path.join(osspath,absfile.split("/"[-1]))
-                res = buc.put_object_from_file(osspath2,absfile)
+        localfile = localfile.rstrip("/")
+        osstest = ossdir.rstrip("/")
+        objs = osslist(ossdir,"")
+        objs2 = osslist(ossdir+"/","")
+        if ( objs and objs2 ) or ossdir.endswith("/"):
+            dirname = localfile.rstrip("/").split("/")[-1]
+            for root,dirs,files in os.walk(localfile) :
+                for f in files:
+                    absfile = os.path.join(root,f)
+                    relpath = absfile[len(localfile)+1:]
+                    osspath2 = os.path.join(osspath,dirname,relpath)
+                    res = buc.put_object_from_file(osspath2,absfile)
+        else:
+            for root,dirs,files in os.walk(localfile) :
+                for f in files:
+                    absfile = os.path.join(root,f)
+                    relpath = absfile[len(localfile)+1:]
+                    osspath2 = os.path.join(osspath,relpath)
+                    #print absfile,osspath2
+                    res = buc.put_object_from_file(osspath2,absfile)
+
+
 
 #ossupload("em","oss://jbiobio/working/")
 #ossupload("oss2tools.py","oss://jbiobio/working/oss2tools.py")

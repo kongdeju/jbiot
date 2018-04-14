@@ -2,14 +2,20 @@ import sys
 import os
 import subprocess
 
-def status_run(cmdfile,wdir):
-    cid = cmdfile.split("/")[-1].split(".")[0]
+def status_run(cid,wdir):
+    
     logdir = ".log"
     cmd = "mkdir -p %s" % logdir
     os.system(cmd)
     logfile = os.path.join(logdir,cid+".log")
-
-    cmd = "sh %s " % cmdfile
+    cmdfile = os.path.join(".task","%s.cmd"%cid)
+    taskdir = os.path.join(wdir,".task")
+    if wdir :
+        cmd = "oss2tools.py download %s ." % (taskdir)
+        os.system(cmd)
+        print cmd
+        cmdfile = os.path.join(".task","%s.bc.cmd"%cid)
+ 
     fp = open(logfile,"w")
     codes = []
     fp2 = open(cmdfile)
