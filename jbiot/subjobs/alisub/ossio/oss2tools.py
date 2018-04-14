@@ -102,6 +102,9 @@ def ossdownload(ossdir,lf):
 
     # ossobj is a dir
     else:
+        if lf == "." or lf == ".." or lf == "~" or lf == "./" or lf == "../" or lf == "~/":
+            dirname= ossdir.strip("/").rsplit("/",1)[-1].strip("/")
+            lf = os.path.join(lf,dirname)
         for oj in objs:
             osspath = oj[6+len(buc)+1:]
             ossdir = ossdir.strip("/")

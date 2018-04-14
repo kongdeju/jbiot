@@ -6,6 +6,7 @@ sys.setdefaultencoding("utf-8")
 import os
 dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
+from jbiot.subjobs.ossfy import ossfy
 from jbiot.subjobs.dockersing import dockersing
 from jbiot.subjobs.lsub.lsub_strip import stripcmd
 from jbiot.subjobs.lsub import lsub_run
@@ -30,6 +31,7 @@ def lsub(cmd,dry,rerun,verbose,force,email,name):
 
 
 def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=False,force=False,timeout=-1):
+    cmdfile = ossfy(cmdfile)
     if docker :
         cmdfile = dockersing(cmdfile,prefer="docker")
     if sing:
