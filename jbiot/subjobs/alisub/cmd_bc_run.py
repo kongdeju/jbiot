@@ -153,7 +153,7 @@ def handle_input(fp,wdir,cmd):
     if not ins:
         # hanle abs oss
         for absoss in osses:
-            cmd = "oss2tools.py absdown %s" % absoss
+            cmd = "oss2tools.py absdown '%s'" % absoss
             line = cmd + "\n" 
             fp.write(line)            
         # hanle rel oss
@@ -182,17 +182,17 @@ def handle_input(fp,wdir,cmd):
                 continue
             if cit.startswith("oss://"):
                 continue
-            cmd = "oss2tools.py reldown %s %s" % (wdir,cit)
+            cmd = "oss2tools.py reldown %s '%s'" % (wdir,cit)
             line = cmd + "\n"
             fp.write(line)
     else:
         for it in ins:
             if it.startswith("oss://"):
-                cmd = "oss2tools.py absdown %s" % it
+                cmd = "oss2tools.py absdown '%s'" % it
                 line = cmd + "\n"
                 fp.write(line)
             else:
-                cmd = "oss2tools.py reldown %s %s" % (wdir,it)
+                cmd = "oss2tools.py reldown %s '%s'" % (wdir,it)
                 line = cmd + "\n"
                 fp.write(line)
     # cmd ...
@@ -266,7 +266,7 @@ def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
         cmd = "docker push localhost:8864/%s" % docker
         info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bacs sub 'status_run.py %s -w %s ' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cid,wdir,jobname,img,tp,vpc,dockerstr,disk,timeout)
+    cmd = "abcs sub 'status_run.py %s -w %s ' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cid,wdir,jobname,img,tp,vpc,dockerstr,disk,timeout)
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
