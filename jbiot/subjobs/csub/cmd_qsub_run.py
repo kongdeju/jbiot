@@ -5,6 +5,17 @@ import subprocess
 import time
 import sys
 
+def infocmd(cmd):
+
+    sys.stderr.write(cmd + "\n")
+    p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    p.wait()
+    info1 = p.stdout.read()
+    info2 = p.stderr.read()
+    info = info1  + "\n" + info2 + "\n"
+    sys.stderr.write(info)
+
+
 def getscript(script):
     p = subprocess.Popen('which %s' % script ,shell=True,stdout=subprocess.PIPE)
     p.wait()
@@ -73,7 +84,12 @@ def execute_qsub(qsubfile):
             return jobid
         time.sleep(5)
 
-def status_qsub(cmdfile):
+def status_qsub(cmdfile,jobid):
+    cmd = "qstat -j %s " % jobid
+    infocmd(cmd)
+    cmd = "qacct -j %s " % jobid
+    infocmd(cmd)
+
     status = 0
     cid = cmdfile.split("/")[-1].split(".")[0]
     logfile = os.path.join(".log",cid+".log")
@@ -85,7 +101,7 @@ def status_qsub(cmdfile):
 def qsub_run(cmdfile,mem,cpu):
     qsubfile = gen_qsub(cmdfile,mem,cpu) 
     jobid = execute_qsub(qsubfile)
-    status,logfile = status_qsub(cmdfile)
+    status,logfile = status_qsub(cmdfile,jobid)
     print status,logfile,jobid 
     return status,logfile,jobid
 

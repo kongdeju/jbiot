@@ -55,14 +55,14 @@ def ossupload(localfile,ossdir):
     buc = oss2.Bucket(auth,region,buc)
     if not os.path.exists(localfile):
         return
-    
 
     if not os.path.isdir(localfile):
+
+        osstest = ossdir.rstrip("/")
         objs = osslist(ossdir,"")
-        prefix = None
-        if objs:
-            prefix = objs[0][:len(ossdir)]
-        if ( prefix == ossdir)  or ossdir.endswith("/"): 
+        objs2 = osslist(ossdir+"/","")
+        
+        if ( objs and objs2) or ossdir.endswith("/") :
             osspath = os.path.join(osspath,localfile.split("/")[-1])
         else:
             osspath = os.path.join(osspath)
@@ -142,7 +142,7 @@ def ossdownload2(ossdir,obj):
 
 def ossprofile(ossdir):
     buc = ossdir[6:].split("/")[0]
-    osspath = ossdir[6+len(buc)+1:]
+    osspath = ossdir[6+len(buc)+1:].strip("/")
     bucket = oss2.Bucket(auth,region,buc)
     profile = {}
     for obj in oss2.ObjectIterator(bucket,osspath):
@@ -167,10 +167,11 @@ def localprofile():
             profile[absfile[2:]] = size
         for di in dirs:
             absdir = os.path.join(root,di)
+            absdir = absdir[2:]
             if not os.listdir(absdir):
-                cmd = "touch %s/.isadirectory" % absdir
+                cmd = "touch %s/.thiswasaemptydirectory" % absdir
                 os.system(cmd)
-                absfile = os.path.join(absdir,".isadirectory")
+                absfile = os.path.join(absdir,".thiswasaemptydirectory")
                 profile[absfile] = 0
     return profile
 
@@ -180,7 +181,6 @@ def localprofile():
 def checkdiff(ossdir):
     ossprf = ossprofile(ossdir)
     lclprf = localprofile()
-    
     touploads = []
     for ln,lz in lclprf.items():
         if ln in ossprf and lz == ossprf[ln]:

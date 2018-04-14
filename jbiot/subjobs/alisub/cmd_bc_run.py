@@ -84,6 +84,22 @@ def gen_lc(cid,wdir,cmd):
     if not ins:
         for i in range(len(cmditems)):
             cit = cmditems[i]
+            if cit.startswith("&"):
+                continue
+            if cit.startswith(">"):
+                continue
+            if cit.startswith(";"):
+                continue
+            if cit.startswith("|"):
+                continue
+            if cit.startswith("["):
+                continue
+            if cit.startswith("]"):
+                continue
+            if cit.startswith("!"):
+                continue
+            if cit.startswith("?"):
+                continue
             if cit.startswith("-"):
                 continue
             if cit.startswith("'"):
@@ -140,6 +156,22 @@ def handle_input(fp,wdir,cmd):
             fp.write(line)            
         # hanle rel oss
         for cit in cmditems:
+            if cit.startswith("&"):
+                continue
+            if cit.startswith(">"):
+                continue
+            if cit.startswith(";"):
+                continue
+            if cit.startswith("|"):
+                continue
+            if cit.startswith("["):
+                continue
+            if cit.startswith("]"):
+                continue
+            if cit.startswith("!"):
+                continue
+            if cit.startswith("?"):
+                continue
             if cit.startswith("-"):
                 continue
             if cit.startswith("'"):
@@ -248,7 +280,11 @@ def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
 
 #execute_bc(".task/abc.cmd")
 
-def status_bc(wdir,cid):
+def status_bc(wdir,cid,jobid):
+
+    cmd = "bcs log %s" % jobid
+    infocmd(cmd)
+
     status = 0
     lstatus = os.path.join(".status",cid+".status")
     cmd = "rm -f %s" % lstatus
@@ -279,7 +315,7 @@ def cmd_run(cmdid,cmd,cpu,mem,docker=None,wdir=None):
         if finish:
             break
         time.sleep(10)
-    status,logfile = status_bc(wdir,cmdid)
+    status,logfile = status_bc(wdir,cmdid,jobid)
     print status,logfile,jobid
     return status,logfile,jobid
 
