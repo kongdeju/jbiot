@@ -56,6 +56,7 @@ def run(cmdfile,mem,cpu,rerun,verbose):
         status = "\033[1;32mpassed\033[0m"
     logfile = os.path.join(".log","%s.log"%cid)
     qcmd = '%s %s ' % (qsub_run,cmdfile)
+    os.system("mkdir -p .log")
     fp = open(logfile,"w")
     fp.write(qcmd+"\n")
     fp.close()

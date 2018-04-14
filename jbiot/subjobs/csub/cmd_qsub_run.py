@@ -27,8 +27,8 @@ def getscript(script):
         qsub_run = "/lustre/users/kongdeju/DevWork/jbiot/bin/status_run.py"
     return qsub_run
 
-status_run = getscript("status_run.py")
-
+#status_run = getscript("status_run.py")
+status_run = "/lustre/users/kongdeju/DevWork/jbiot/bin/status_run.py"
 def gen_qsub(cmdfile,mem,cpu):
     cmdid = cmdfile.split("/")[-1].split(".")[0]
     logdir = ".log"
@@ -48,7 +48,7 @@ def gen_qsub(cmdfile,mem,cpu):
 #$ -o %s
 #$ -e %s
 %s %s
-        """ % (jobname,log,log,status_run,cmdfile)
+        """ % (jobname,log,log,status_run,cmdid)
     qsub =  cmdid + ".qsub"
     qsub = os.path.join(taskdir,qsub)
     fp = open(qsub,"w")

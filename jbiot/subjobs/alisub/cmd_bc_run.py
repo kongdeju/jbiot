@@ -266,7 +266,7 @@ def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
         cmd = "docker push localhost:8864/%s" % docker
         info = infocmd(cmd)
         dockerstr = " --docker=%s@oss://jbiobio/dockers/ " % docker
-    cmd = "bcs sub 'status_run.py %s -w %s ' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin  -p %s "  % (cid,wdir,jobname,img,tp,vpc,dockerstr,disk,timeout,cmdfile)
+    cmd = "bacs sub 'status_run.py %s -w %s ' %s -i %s -t %s --vpc_cidr_block %s %s --disk %s --timeout=%s  -e PATH:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "  % (cid,wdir,jobname,img,tp,vpc,dockerstr,disk,timeout)
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
