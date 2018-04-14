@@ -8,7 +8,8 @@ from ..jblog import jblog
 import signal
 import time
 import psutil
-
+import re
+pat = re.compile(r"(docker|singularity)[\s\S]+\$PWD\s+(.+?)\s+(.+)")
 def getscript(script):
     p = subprocess.Popen('which %s' % script ,shell=True,stdout=subprocess.PIPE)
     p.wait()
@@ -35,9 +36,13 @@ def run(cmdfile,mem,cpu,rerun,verbose):
  
     cid = cmdfile.split("/")[-1].split(".")[0]
     cmd = open(cmdfile).read().strip("\n")
+    icmd = cmd
+    mat = pat.search(cmd)
+    if mat :
+        icmd = mat.groups()[-1]
     jobid = None
     
-    info = """    exec... %s""" % cmd
+    info = """    exec... %s""" % icmd
     if verbose:
         info = """    exec... %s
         %s """ % ( cmd,os.path.join(".log",cid+".log"))
@@ -77,7 +82,7 @@ def run(cmdfile,mem,cpu,rerun,verbose):
         status: %s
         jobid : %s
         logfile:%s
-        """ % (cmd,status,jobid,logfile)
+        """ % (icmd,status,jobid,logfile)
 
     if verbose:
         logcmd = "cat %s" % logfile

@@ -8,7 +8,8 @@ from ..jblog import jblog
 import signal
 import time
 import psutil
-
+import re
+pat = re.compile(r"(docker|singularity)[\s\S]+\$PWD\s+(.+?)\s+(.+)")
 cmdstatus = ".status"
 def checkstatus(cid):
     if not os.path.exists(cmdstatus):
@@ -26,7 +27,12 @@ def addstatus(cid):
     os.system(cmd)
 
 def run(cid,cmd,rerun=False,verbose=False):
-    info = """    exec... %s""" % cmd
+    icmd= cmd
+    mat = pat.search(cmd)
+    if mat:
+        icmd = mat.groups()[-1]
+
+    info = """    exec... %s""" % icmd
     if verbose:
         info = """    exec... %s
         %s """ % ( cmd,os.path.join(".log",cid+".log"))
@@ -56,7 +62,7 @@ def run(cid,cmd,rerun=False,verbose=False):
     finish... %s
         status: %s
         logfile: %s
-    """ % (cmd,status,logfile)
+    """ % (icmd,status,logfile)
     if verbose:
         logcmd = "cat %s" % logfile
         p = subprocess.Popen(logcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)

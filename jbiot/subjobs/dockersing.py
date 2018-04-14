@@ -2,6 +2,7 @@
 from collections import OrderedDict
 import os
 import logging
+import subprocess
 
 def findDockerSingul(item):
     items = item.split()
@@ -16,23 +17,52 @@ def findDockerSingul(item):
     sing = sing.strip()
     return docker,sing
 
-def handleSing(simg):
+def handlesing(simg):
     #bug fixec
     home = os.environ["HOME"]
     sdir = os.path.join(home,".singularity")
-    if not os.path.exists(sdir):
-        os.system("mkdir %s" % sdir)
     simgPath = os.path.join(sdir,simg)
     if os.path.exists(simgPath):
         return simgPath
-    simghttp = "http://www.genescret.com:6636/singularity/%s" % simg
+    print "download...%s" % simg 
+    simghttp = "http://www.genescret.com:6636/dev-env/singularity/%s" % simg
     cmd = "wget -P %s %s" % (sdir,simghttp)
-    flag = os.system(cmd)
+    print "\t%s" % cmd
+    p = subprocess.Popen(cmd,shell=True)
+    flag = p.wait()
     if flag == 0:
+        print "\t got it."
         return simgPath
-    msg = "%s not found" % simg
-    logging.warning(msg)
+    print "\t not found."
     return 
+
+def choosewinner(docker,sing,prefer):
+    d = 0
+    s = 0
+    if docker :
+        d = d + 1
+    if prefer == "docker":
+        d = d * 2
+    if sing :
+        s = s + 1
+    if prefer == "singularity":
+        s = s * 2
+
+    if d == s:
+        return "none"
+
+    if d > s :
+        return "docker"
+ 
+    if d < s :
+        spath = handlesing(sing)
+        if spath: 
+            return "singularity,%s" % spath
+        else:
+            if d :
+                return "docker"
+    return "none"
+    
 
 def dockersing(cmdfile,prefer="docker"):
     fp = open(cmdfile)
@@ -58,8 +88,6 @@ def dockersing(cmdfile,prefer="docker"):
     afterDict = OrderedDict()
     for tag,cmds in cmddict.items():
         docker,sing = findDockerSingul(tag)
-        if sing:
-            sing = handleSing(sing)
         if not ( docker or sing ):
             afterDict[tag] = cmds
             continue
@@ -75,21 +103,14 @@ def dockersing(cmdfile,prefer="docker"):
                     element = rootDir + element
                     cmdelements[i] = element
             cmd = " ".join(cmdelements)
-            dcmd = ""
-            scmd = ""
-            if docker :
-                dcmd = "docker run --rm -v /:%s -v $PWD:$PWD -w $PWD %s %s" % (rootDir,docker,cmd)
-            if sing:
-                scmd = "singularity exec --bind /:%s %s %s " % (rootDir,sing,cmd)
-            if  dcmd and scmd and prefer=="docker":
-                vcmd = dcmd
-            if dcmd and scmd and prefer=="singularity":
-                vcmd = scmd
-            if dcmd and not scmd:
-                vcmd = dcmd
-            if scmd and not dcmd:
-                vcmd = scmd
-       
+            
+            winner =  choosewinner(docker,sing,prefer)
+            if winner == "docker":
+                vcmd = "docker run --rm -v /:%s -v $PWD:$PWD -v $HOME:$HOME -w $PWD %s %s" % (rootDir,docker,cmd)
+            if winner.startswith("singularity"):
+                sing = winner.split(",")[-1]
+                vcmd = "singularity exec --bind /:%s --bind $PWD:$PWD %s %s " % (rootDir,sing,cmd)
+            
             vcmds.append(vcmd)
         
         afterDict[tag] = vcmds
