@@ -29,17 +29,11 @@ cmdstatus = ".status"
 def checkstatus(cid):
     if not os.path.exists(cmdstatus):
         os.mkdir(cmdstatus)
-    s = os.path.join(cmdstatus,cid)
+    s = os.path.join(cmdstatus,cid+".status")
     if os.path.exists(s):
         return 1
     return 0
 
-def addstatus(cid):
-    if not os.path.exists(cmdstatus):
-        os.mkdir(cmdstatus)
-    cp = os.path.join(cmdstatus,cid)
-    cmd = "touch %s" % cp
-    os.system(cmd)
 
 def run(cid,cmd,cmdfile,cpu,mem,wdir,docker,rerun=False,verbose=False):
     info = """    exec... %s""" % cmd
@@ -73,13 +67,12 @@ def run(cid,cmd,cmdfile,cpu,mem,wdir,docker,rerun=False,verbose=False):
             if s:
                 s = 1
                 status = "\033[1;32msuccess\033[0m"
-                addstatus(cid)
             else:
                 s = 0
                 status = "\033[1;33mfailed\033[0m"
-    fp = open(logfile,"a")
-    fp.write(steinfo)
-    fp.close()
+        fp = open(logfile,"a")
+        fp.write(steinfo)
+        fp.close()
     info = """
     finish... %s
         status: %s

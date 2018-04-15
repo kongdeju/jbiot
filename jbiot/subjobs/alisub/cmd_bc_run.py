@@ -138,17 +138,23 @@ def handle_input(fp,wdir,cmd):
     ins,outs,cmd = handlecmdio(cmd)
 
     #format cmd
-    cmditems = re.split(r' +',cmd)
     osses = []
-    cmds = []
-    for cit in cmditems:
-        if cit.startswith("oss://"):
-            osses.append(cit)
-            cit = cit[6:]
-            cit = os.path.join("/tmp",cit)
-        cmds.append(cit)
-    ccmd = " ".join(cmds) 
-   
+    ccs = []
+    CMDS = cmd.split(";")
+    allitems = []
+    for cmd in CMDS:
+        cmditems = re.split(r' +',cmd)
+        allitems.extend(cmditems)
+        cmds = []
+        for cit in cmditems:
+            if cit.startswith("oss://"):
+                osses.append(cit)
+                cit = cit[6:]
+                cit = os.path.join("/tmp",cit)
+            cmds.append(cit)
+        ccmd = " ".join(cmds) 
+        ccs.append(ccmd)
+    ccmd = ";".join(ccs)
 
     if not ins:
         # hanle abs oss
@@ -157,7 +163,7 @@ def handle_input(fp,wdir,cmd):
             line = cmd + "\n" 
             fp.write(line)            
         # hanle rel oss
-        for cit in cmditems:
+        for cit in allitems:
             if cit.startswith("&"):
                 continue
             if cit.startswith(">"):

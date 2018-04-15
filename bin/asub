@@ -11,6 +11,7 @@ from jbiot.subjobs.dockersing import dockersing
 from jbiot.subjobs.alisub.asub_strip import stripcmd
 from jbiot.subjobs.alisub.task_bc_run import task_run
 from jbiot.subjobs.jblog import jblog
+from jbiot.subjobs.wdir import readwdir,setwdir
 from jbiot.subjobs.jbmsg import jbmsg
 from jbiot.subjobs.alisub.checkbcs import checkbcs,checkdcs
 
@@ -30,12 +31,14 @@ def asub(cmd,dry,wdir,rerun,verbose,force,email,name):
             jblog("go execute cause force mode is set on...")
     jbmsg(cmd,email,name)
 
-def main(cmdfile,dryflag,email,name,rerun=False,verbose=False,force=False,timeout=-1):
+def main(cmdfile,dryflag,email,name,wdir,rerun=False,verbose=False,force=False,timeout=-1):
     bcs =  checkbcs()
     dcs = checkdcs()
+
     if bcs and dcs:
-        ftime = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
-        wdir = "oss://jbiobio/working/tmp/%s/" % ftime
+        if not wdir:
+            wdir = readwdir()
+        setwdir(wdir)
         asub(cmdfile,dryflag,wdir,rerun,verbose,force,email,name) 
 
 
@@ -59,7 +62,7 @@ if __name__ == "__main__":
         --force                  force run even error detected
         --verbose                verbose mode lot of information will print
         -e,--email=<email>       email of you want to remind of
-        -w,--wechat=<name>       wechat name you want to send to
+        -w,--wdir=<dirname>      oss working directory
         -n,--name=<job_name>     the name of this task.
         --timeout=<timeout>      maxium seconds to run this job [default: -1]
     """
@@ -67,11 +70,11 @@ if __name__ == "__main__":
     cmdfile = args["<cmdfile>"]
     dryflag = args["--dry"]
     email = args["--email"]
-    wechat = args["--wechat"]
+    wdir = args["--wdir"]
     name = args["--name"]
     verbose = args["--verbose"]
     force = args["--force"]
     rerun = args["--rerun"]
     timeout = args["--timeout"]
-    main(cmdfile,dryflag,email,name,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
+    main(cmdfile,dryflag,email,name,wdir,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
     
