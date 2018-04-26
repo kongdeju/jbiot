@@ -28,6 +28,7 @@ def report(params):
 
     render_yml = "{{projName}}_render.yml"
     cmd = "echo '%s' > %s" % (json.dumps(indict),render_yml)
+    log.run("get {{projName}} args to render",cmd)
 
     templ = get_template("{{projName}}")
     out = "{{projName}}.md"

@@ -11,8 +11,7 @@ def get_template(projName):
     #    os.mkdir(localdir)
  
     localfile = os.path.join(localdir,tmpl)
-    #if os.path.exists(localfile):
-    #    return localfile
+    cwdlocalfile  = tmpl
 
     remote = url + "%s/%s_template.md" % (projName,projName)
     cmd = "wget %s -P %s" % (remote,localdir)

@@ -1,0 +1,52 @@
+import os
+from jbiot import log
+from jbiot import yamladd
+from jbiot import jbiotWorker
+import yaml
+
+try:
+    import config 
+except:
+    pass
+
+
+def {{appName}}(params):
+    """introduction to {{appName}}
+    
+    Args:
+        params: input dict, key is `yaml`, value is yaml file, fowllowing key needed:
+            
+            key1 : value1
+
+
+    Returns:
+        dict : output dict ,of which key is `yaml`, value is yaml file,following key added::
+
+            key1 : value1
+    """
+
+    # handle input
+    ymlin = params["yaml"]
+    indict = yaml.load(open(ymlin).read())
+
+
+
+    # process cmd
+
+
+
+    # handle output
+    outdict = {}
+    
+    outdict = yamladd(ymlin,outdict)
+    return outdict
+
+
+# for omics platform
+class {{appName}}Worker(jbiotWorker):
+    def handle_task(self,key,params):
+        self.execMyfunc({{appName}},params)
+
+
+
+

@@ -86,16 +86,16 @@ class log:
                 outs = files.values()
 
             for f in outs:
-                cmd = "cp %s %s" % (f,tgtdir)
+                cmd = "cp -r %s %s" % (f,tgtdir)
                 log.run(tag,cmd)
         
         if type(files) == str:
-            cmd = "cp %s %s " % (files,tgtdir)
+            cmd = "cp -r %s %s " % (files,tgtdir)
             log.run(tag,cmd)
 
         if type(files) == list:
             for f in files:
-                cmd = "cp %s %s" % (f,tgtdir)
+                cmd = "cp -r %s %s" % (f,tgtdir)
                 log.run(tag,cmd)
                                                     
 def test_log():

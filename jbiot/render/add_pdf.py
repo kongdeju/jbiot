@@ -30,7 +30,7 @@ def getimgsize(image):
 def render_png(png):
     w,h = getimgsize(png)
     raw = b64(png)
-    cont = '\n<img src="data:image/png;base64,%s" width=%s height=%s>\n' % (raw,w,h)
+    cont = '\n<center><img src="data:image/png;base64,%s" width=%s height=%s></center>\n' % (raw,w,h)
     return cont
 
 def pdf2png(pdf):

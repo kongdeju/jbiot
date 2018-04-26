@@ -10,11 +10,11 @@ def tsv2xls(tsv):
     sheet1=workbook.add_sheet('sheet1',cell_overwrite_ok=True)
 
     fp = open(tsv)
-    lines = fp.readlines()
+    lines = fp.readlines()[:50000]
     for i in range(len(lines)):
         items = lines[i].strip("\n").split("\t")
         for j in range(len(items)):
-            sheet1.write(i,j,items[j])
+            sheet1.write(i,j,items[j][:32766])
 
     workbook.save(xlsfile)
 

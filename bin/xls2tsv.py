@@ -13,7 +13,7 @@ def xls2tsv(xls):
     fp = open(tsvfile,"w")    
     for i in xrange(0,nrows):
         rowValues = table.row_values(i)
-        line = "\t".join(rowValues) + "\n"
+        line = "\t".join([str(item) for item in rowValues]) + "\n"
         fp.write(line)
     fp.close()
 
@@ -32,5 +32,5 @@ if __name__ == "__main__":
     """
     args = docopt(usage)
     xls = args["<xls>"]
-    tsv2xls(xls)
+    xls2tsv(xls)
     

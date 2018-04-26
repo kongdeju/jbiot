@@ -4,6 +4,11 @@ contents goes here...
 {{add_text(text)}}
 
 
+tsv goes here...
+
+{{add_tsv(tsv)}}
+
+
 xls goes here...
 
 {{add_xls(xls)}}
@@ -55,3 +60,12 @@ add_pngsnodict go here..
 add_pdfsnodict go here..
 
 {{add_pdfs(pngsnull)}}
+
+
+add_svg go here...
+
+{{add_svg(svg)}}
+
+
+
+

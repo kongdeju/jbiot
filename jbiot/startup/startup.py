@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-
-from pyscaffold.cli import run
+#coding=utf-8
 import os
 from jinja2 import Template
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 putup = "putup"
 setup = os.path.join(os.path.dirname(os.path.abspath(__file__)),"setup.py")
@@ -18,6 +20,15 @@ curdir = os.getcwd()
 maindocker = os.path.join(os.path.dirname(os.path.abspath(__file__)),"qc_report_within_docker.py")
 main_ = os.path.join(os.path.dirname(os.path.abspath(__file__)),"qc_report.py")
 raw = os.path.join(os.path.dirname(os.path.abspath(__file__)),"qc_report_without_docker.py")
+sdir = os.path.dirname(os.path.abspath(__file__))
+
+def render(tmp,tgt,proj):
+    mc = open(tmp).read()
+    template = Template(mc)
+    rc = template.render(projName=proj)
+    fp = open(tgt,"w")
+    fp.write(rc)
+    fp.close()
 
 def startup(proj):
     cmd = "putup -p %s %s " % (proj,proj)
@@ -74,28 +85,6 @@ def startup(proj):
     cmd = "chmod +x %s/bin/%s.py" % (proj,proj)
     os.system(cmd)
 
-    # main docker
-    '''
-    mc = open(maindocker).read()
-    template = Template(mc)
-    md = template.render(projName=proj)
-    mdocker = "%s/bin/%s_within_docker.py" % (proj,proj)
-    fp = open(mdocker,"w")
-    fp.write(md)
-    fp.close()
-    cmd = "chmod +x %s" % mdocker
-    os.system(cmd)    
-    # main raw
-    mc = open(raw).read()
-    template = Template(mc)
-    md = template.render(projName=proj)
-    mdocker = "%s/bin/%s_without_docker.py" % (proj,proj)
-    fp = open(mdocker,"w")
-    fp.write(md)
-    fp.close()
-    cmd = "chmod +x %s" % mdocker
-    os.system(cmd)
-    '''
     #5. proj/arranger
     arrdir =  "%s/%s/arranger" % (proj,proj)
     cmd = "mkdir -p %s" % arrdir
@@ -148,7 +137,37 @@ def startup(proj):
     os.chdir(proj)
     os.system("rm skeleton.py")
     os.chdir(curdir)
-  
+    os.chdir(proj)
+    os.chdir("tests")
+    os.system("mkdir -p data")
+    os.system("touch data/arrange.yml")
+    os.system("touch data/report.yml")
+    os.system("touch data/main.yml")
+   
+    arrange_templ = os.path.join(sdir,"test_arrange.py") 
+    render(arrange_templ,"test_arrange.py",proj)
+    report_templ = os.path.join(sdir,"test_report.py")
+    render(report_templ,"test_report.py",proj)
+    main_templ = os.path.join(sdir,"test_main.py")
+    render(main_templ,"test_main.py",proj)
+    os.chdir(curdir)
+    os.chdir(proj)
+    os.chdir("docs")
+    index_templ = os.path.join(sdir,"index.rst")
+    render(index_templ,"index.rst",proj)
+
+    
+
+    os.chdir(curdir)
+    report_templ = os.path.join(sdir,"template.md")
+    home = os.environ["HOME"]
+    tdir = os.path.join(home,".templates")
+    os.system("mkdir -p %s" % tdir)
+    md = "%s_template.md" % proj
+    report_md = os.path.join(tdir,md)
+    render(report_templ,report_md,proj)
+    os.system("ln -s %s %s/%s/reporter/" % (report_md,proj,proj))
+    
     os.chdir(proj)
     os.system("git add . -A") 
     os.system("git commit -m 'init my project'") 

@@ -1,5 +1,8 @@
 
 text: this is content...
+
+tsv: test.tsv
+
 xls: test.xls
 
 xlss: 
@@ -38,3 +41,6 @@ pngsnull:
     - no.png
     - no.png
     - no.png
+
+
+svg: test.svg

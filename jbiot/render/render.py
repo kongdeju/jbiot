@@ -21,6 +21,9 @@ from add_png import getimgsize
 from add_pdf import pdfs2pngs 
 from add_pdf import add_pdf
 from add_pngs import handle_pngs
+from add_tsv import add_tsv
+from add_svg import add_svg
+from add_html import add_html
 
 def render(tpl,ijson,out,yml):
     mac = open(macro).read()
@@ -36,6 +39,9 @@ def render(tpl,ijson,out,yml):
     temp.globals["pdfs2pngs"] = pdfs2pngs
     temp.globals["add_pdf"] = add_pdf
     temp.globals["handle_pngs"] = handle_pngs
+    temp.globals["add_tsv"] = add_tsv
+    temp.globals["add_svg"] = add_svg
+    temp.globals["add_html"] = add_html
     if yml:
         args = yaml.load(open(ijson).read())
     else:
