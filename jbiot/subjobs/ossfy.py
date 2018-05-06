@@ -22,27 +22,30 @@ def osscmd(cmd):
 def ossfy(cmdfile):
 
     lines = open(cmdfile).readlines()
-    osscmdfile = cmdfile.rsplit(".",1)[0] + ".oss.cmd"
-    fpw = open(osscmdfile,"w")
     osslines = []
+    cmdlines = []
     for line in lines:
         line = line.strip()
         if not line.startswith("#"):
             osscmds,line = osscmd(line)
             osslines.extend(osscmds)
             line = "\t" + line
-        line = line +" \n" 
-        fpw.write(line)
-    fpw.close()
+        cmdlines.append(line)
 
     # handle ossfiles
     osslines  = set(osslines)
     if osslines:
+        cmdfile = cmdfile.rsplit(".",1)[0] + ".ossfy.cmd"
+        fpw = open(cmdfile,"w")
+        for line in cmdlines:
+            line = line + "\n"
+            fpw.write(line)
+        fpw.close()
         print "\ndownloading oss files...\n"
     for ossline in osslines:
         print "\t" + ossline
         os.system(ossline)
-    return osscmdfile
+    return cmdfile
 
 
 if __name__ == "__main__":

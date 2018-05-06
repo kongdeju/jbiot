@@ -12,6 +12,7 @@ from jbiot.subjobs.lsub.lsub_strip import stripcmd
 from jbiot.subjobs.lsub import lsub_run
 from jbiot.subjobs.jblog import jblog
 from jbiot.subjobs.jbmsg import jbmsg
+import threading
 
 def lsub(cmd,dry,rerun,verbose,force,email,name):
     tasks = stripcmd(cmd)
@@ -36,7 +37,16 @@ def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=
         cmdfile = dockersing(cmdfile,prefer="docker")
     if sing:
         cmdfile = dockersing(cmdfile,prefer="singularity")
-    lsub(cmdfile,dryflag,rerun,verbose,force,email,name) 
+
+    t = threading.Thread(target=lsub,args=(cmdfile,dryflag,rerun,verbose,force,email,name) )
+    t.start()
+    if timeout == -1:
+        t.join()
+    else:
+        t.join(timeout)
+    if t.is_alive():
+        jblog("\033[1;31m\nJob timeout...\033[0m")    
+        t._Thread__stop()
 
 if __name__ == "__main__":
 
@@ -73,6 +83,6 @@ if __name__ == "__main__":
     verbose = args["--verbose"]
     force = args["--force"]
     rerun = args["--rerun"]
-    timeout = args["--timeout"]
+    timeout = int(args["--timeout"])
     main(cmdfile,dryflag,email,name,docker=docker,sing=sing,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
     

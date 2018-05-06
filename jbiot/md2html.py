@@ -14,7 +14,7 @@ def get_style(style):
     tgz = os.path.join(mdir,tgz)
     if os.path.exists(tgz):
         return tgz
-    url = "www.genescret.com:6636/dev-report/styles/%s.tgz" % style
+    url = "http://www.jbio.cc:6636/dev-report/styles/%s.tgz" % style
     cmd = "wget -P %s %s" % (mdir,url)
     os.system(cmd)
     return tgz

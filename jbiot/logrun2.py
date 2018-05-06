@@ -6,7 +6,10 @@ import sys
 main_name =  sys.argv[0]
 main_name = main_name.split("/")[-1].split(".")[0]
 
-hostname = os.environ["HOSTNAME"]
+hostname = main_name
+cfile = hostname + ".cmd"
+if os.path.exists(cfile):
+    os.system("rm %s" % cfile)
 
 def load2dict(cmdfile):
     dic = OrderedDict()
@@ -41,19 +44,16 @@ class log:
     @staticmethod
     def run(tag,cmd,i=[],o=[],cpu=1,para=1,mem="2G",docker='jbioi/alpine-dev',singularity='alpine-dev.img'):
         cmdfile =  hostname + ".cmd"
-        iocmdfile =  hostname + ".ali.cmd"
         cmdict = load2dict(cmdfile)
-        iocmdict = load2dict(iocmdfile)
         tag = "#### %s: %s --para=%s --cpu=%s --mem=%s --docker=%s --singularity=%s" % (main_name,tag,para,cpu,mem,docker,singularity)
-        icmd = ""
         if i:
             i = ",".join(i)
             icmd = "I=%s" % i
-        ocmd = ""
+            cmd = cmd + ";    " + icmd
         if o:
             o = ",".join(o)
             ocmd = "O=%s" % o
-        iocmd = cmd + ";     " + icmd + ";" + ocmd
+            cmd = cmd +  ";    " + ocmd
 
         #dict
         if tag in cmdict:
@@ -62,12 +62,6 @@ class log:
             cmdict[tag] = [cmd]
         dict2cmd(cmdict,cmdfile)
 
-        #iodict        
-        if tag in iocmdict:
-            iocmdict[tag].append(iocmd)
-        else:
-            iocmdict[tag] = [iocmd]
-        dict2cmd(iocmdict,iocmdfile)
 
     @staticmethod
     def move(files,tgtdir):

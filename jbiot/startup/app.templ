@@ -1,13 +1,16 @@
+
+try:
+    import config 
+except Exception,e:
+    print e
+
 import os
 from jbiot import log
 from jbiot import yamladd
 from jbiot import jbiotWorker
 import yaml
 
-try:
-    import config 
-except:
-    pass
+sdir = os.path.dirname(os.path.abspath(__file__))
 
 
 def {{appName}}(params):

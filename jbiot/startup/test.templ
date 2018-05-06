@@ -1,0 +1,12 @@
+import sys
+sys.path.append("../")
+from {{projName}}.{{appName}}.{{appName}}  import *
+
+indict = {"yaml":"data/{{appName}}.yml"}
+
+def test_{{appName}}():
+    {{appName}}(indict)
+
+if __name__ == "__main__":
+    pass
+    #test_{{appName}}()

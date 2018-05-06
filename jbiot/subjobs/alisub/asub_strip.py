@@ -16,7 +16,11 @@ def profilecmd(cmdfile):
     content = ""
     fp = open(cmdfile)
     taskdict = OrderedDict()
-    for line in fp.readlines():
+    lines = fp.readlines()
+    name = "###" + cmdfile.split("/")[-1].split(".")[0]
+    lines.insert(0,name)
+
+    for line in lines:
         line = line.strip()
         if not line: 
             continue
@@ -42,6 +46,8 @@ def gentask(taskdict):
     tasks = []
     i = 1
     for task,cmds in taskdict.items():
+        if len(cmds) == 1:
+            continue
         taskname = 'task_%02d.cmd' % i
         taskname = os.path.join(tdir,taskname)
         fp = open(taskname,"w")

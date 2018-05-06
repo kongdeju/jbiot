@@ -24,5 +24,13 @@ def add_svg(svg):
         img = render_svg(svg)
         return img
 
+    if type(svg) == list and checkexists(svg[0]):
+        img = render_svg(svg[0])
+        return img
+
+    if type(svg) == dict and checkexists(svg.values()[0]):
+        img = render_svg(svg.values()[0])
+        return img
+
     return "\nno img data\n"
 

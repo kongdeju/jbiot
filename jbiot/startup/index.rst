@@ -37,7 +37,7 @@ use git to clone code::
 
 ..  attention::
 
-    if you want to run {{projName}} on local server without docker , try to add `config.py`.
+    if you want to run ``{{projName}}`` on local server without docker , try to add ``config.py``.
 
 
 Usage
@@ -49,7 +49,7 @@ just type command::
     /path/to/{{projName}}.py -h
 
 
-developments followed by `Dcer` rules, script will need a yaml file,which shoud contain following key and values::
+developments followed by ``Dcer`` rules, script will need a yaml file,which shoud contain following key and values::
 
     key: value
  
@@ -77,16 +77,8 @@ Code
 ====
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-    License <license>
-    Changelog <changes>
+    Guide <index>
     Code Docs <api/modules>
-
-Indices
-=======
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
