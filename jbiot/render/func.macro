@@ -9,7 +9,7 @@
               <div class="next1" id="next1"><img src="./images/index_tab_r.png" alt="" width="28" height="51"></div>
               <ul style="width: 1600px; left: 0px;">
 {% for item in images %}
-                        <li class="slide" style="float: left;"><a title="{{ getName(item) }}" href="javascript:;" class="img-toggle"><img src="data:image/png;base64,{{ baseimg(item) }}" width="{{getimgsize(item)[0]}}" height="getimgsize(item)[1]"></a></li>
+                        <li class="slide" style="float: left;"><a title="{{ getName(item) }}" href="javascript:;" class="img-toggle"><img src="data:image/png;base64,{{ baseimg(item) }}" ></a></li>
 
 {% endfor %}
               </ul>

@@ -28,9 +28,9 @@ def getimgsize(image):
     return (w,h)
 
 def render_png(png):
-    w,h = getimgsize(png)
+    #w,h = getimgsize(png)
     raw = b64(png)
-    cont = '\n<center><img src="data:image/png;base64,%s" width=%s height=%s></center>\n' % (raw,w,h)
+    cont = '\n<center><img src="data:image/png;base64,%s" ></center>\n' % (raw)
     return cont
 
 def add_png(png):

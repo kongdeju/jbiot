@@ -6,7 +6,7 @@ xlrd
 xlwt
 docopt
 mkdocs
-pillow
+#pillow
 pymdown-extensions
 batchcompute-cli
 oss2
