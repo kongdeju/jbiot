@@ -3,11 +3,13 @@ import os
 import subprocess
 
 def status_run(cid,wdir):
+
     logdir = ".log"
     cmd = "mkdir -p %s" % logdir
     os.system(cmd)
     logfile = os.path.join(logdir,cid+".log")
     cmdfile = os.path.join(".task","%s.cmd"%cid)
+
     if wdir :
         taskdir = os.path.join(wdir,".task")
         cmd = "oss2tools.py download %s ." % (taskdir)
@@ -15,7 +17,7 @@ def status_run(cid,wdir):
         print cmd
         cmdfile = os.path.join(".task","%s.bc.cmd"%cid)
  
-    fp = open(logfile,"w")
+    fp = open(logfile,"a")
     codes = []
     fp2 = open(cmdfile)
     for line in fp2.readlines():
@@ -28,13 +30,17 @@ def status_run(cid,wdir):
             break
 
     cmdstatus = ".status"
+    cmd = "mkdir -p %s" % cmdstatus
+    os.system("mkdir -p %s" % cmdstatus)
+
+    finishfile = os.path.join(cmdstatus,cid+".finished")
+    os.system("rm -f %s 1>>/dev/null 2>>/dev/null" % finishfile)
     statusfile = os.path.join(cmdstatus,cid+".status") 
     os.system("rm -f %s 1>>/dev/null 2>>/dev/null" % statusfile)
     code = sum(codes)
-    print code    
+
+    os.system("touch %s" % finishfile)
     if not code:
-        cmd = "mkdir -p %s" % cmdstatus
-        os.system(cmd)
         os.system("touch %s" % (statusfile))
 
     if wdir:

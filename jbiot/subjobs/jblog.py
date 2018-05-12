@@ -1,8 +1,22 @@
 import os
 import sys
 
-name = sys.argv[0].split("/")[-1].split(".")[0]
-logfile = "%s.log" % name
+
+tool = sys.argv[0].split("/")[-1].split(".")[0]
+cmdfile = None
+for arg in sys.argv[1:]:
+    if arg.startswith("-"):
+        continue
+    cmdfile = arg
+
+if cmdfile:
+    name = cmdfile.split("/")[-1].split(".")[0]
+    logfile = "%s.log" % name
+    fp = open(logfile,"w")
+    line = "...run with %s...\n" % tool
+    fp.write(line)
+    fp.close()
+
 
 def jblog(text):
     origin = sys.stdout

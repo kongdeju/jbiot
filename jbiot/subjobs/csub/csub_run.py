@@ -5,23 +5,35 @@ import sys
 from multiprocessing import Pool,Process
 import subprocess
 from ..jblog import jblog
+from ..stopjobs import cstop
 import signal
 import time
-import psutil
 import re
 pat = re.compile(r"(docker|singularity)[\s\S]+\$PWD\s+(.+?)\s+(.+)")
-def getscript(script):
-    p = subprocess.Popen('which %s' % script ,shell=True,stdout=subprocess.PIPE)
-    p.wait()
-    info = p.stdout.read()
-    info = info.strip()
-    if info:
-        qsub_run = script
-    else:
-        qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),script)
-    return qsub_run
 
-qsub_run = getscript("cmd_qsub_run.py")
+parent_id = os.getpid()
+pid_pat =  re.compile("\((\d+?)\)")
+def init_worker():
+    def sig_init2(signal_num,frame):
+        cstop()
+        cmd = "pstree -p %s" % parent_id
+        p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        out = p.stdout.read()
+        pids = pid_pat.findall(out)
+        pids = set(pids)
+        for pid in pids:
+            cmd = "kill -9 %s 1>>/dev/null 2>>/dev/null"  % pid
+            os.system(cmd)
+        cmd = "kill -9 %s 1>>/dev/null 2>>/dev/null" % parent_id
+        os.system(cmd)
+
+        pid = os.getpid()
+        cmd = "kill -9 %s 1>>/dev/null 2>>/dev/null" % pid
+        os.system(cmd)
+        sys.exit()
+    signal.signal(signal.SIGINT, sig_init2)
+
+
 cmdstatus = ".status"
 def checkstatus(cid):
     if not os.path.exists(cmdstatus):
@@ -30,6 +42,10 @@ def checkstatus(cid):
     if os.path.exists(s):
         return 1
     return 0
+
+cmd_run = "/lustre/users/kongdeju/DevWork/jbiot/jbiot/subjobs/csub/cmd_qsub_run.py"
+if not os.path.exists(cmd_run):
+    cmd_run = "cmd_qsub_run.py"
 
 
 def run(cmdfile,mem,cpu,rerun,verbose):
@@ -55,10 +71,10 @@ def run(cmdfile,mem,cpu,rerun,verbose):
     if s:
         status = "\033[1;32mpassed\033[0m"
     logfile = os.path.join(".log","%s.log"%cid)
-    qcmd = '%s %s ' % (qsub_run,cmdfile)
     os.system("mkdir -p .log")
     fp = open(logfile,"w")
-    fp.write(qcmd+"\n")
+    qcmd = '%s %s ' % (cmd_run,cmdfile)
+    fp.write(qcmd+"\n\n")
     fp.close()
     if not s:
         p = subprocess.Popen(qcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -123,17 +139,6 @@ def parsecmd(cmdfile):
         torun.append(cmdf)
     return torun
 
-parent_id = os.getpid()
-def init_worker():
-    def sig_int(signal_num, frame):
-        parent = psutil.Process(parent_id)
-        for child in parent.children():
-            if child.pid != os.getpid():
-                child.kill()
-        parent.kill()
-        psutil.Process(os.getpid()).kill()
-    signal.signal(signal.SIGINT, sig_int)
-
 
 def main(cmdfile,mem,cpu,rerun,verbose):
     jblog("\nexecuting %s ...\n" % cmdfile)
@@ -143,6 +148,7 @@ def main(cmdfile,mem,cpu,rerun,verbose):
     try:
         ps = []
         for cmdfile in cmdfiles:
+            time.sleep(10)
             p = pools.apply_async(run,(cmdfile,mem,cpu,rerun,verbose)) 
             ps.append(p)
         pools.close()

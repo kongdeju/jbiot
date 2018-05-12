@@ -20,6 +20,8 @@ def get_style(style):
     return tgz
 
 def md2html(md,style):
+
+    prex = md.split("/") [-1].split(".")[0]
     mkdoctemplate = get_style(style)
 
     curdir = os.getcwd()
@@ -48,7 +50,7 @@ def md2html(md,style):
     cmd = "rm -rf mkdocFiles"
     os.system(cmd)
 
-    cmd = "tar cvzf html.tgz html/"
+    cmd = "tar cvzf %s.tgz html/" % prex
     os.system(cmd)
 
     cmd = "rm -rf html/"

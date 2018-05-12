@@ -1,6 +1,6 @@
 import os
 from logrun2 import log
-url = "http://www.genescret.com:6636/dev-report/"
+url = "http://jbio.cc:6636/dev-report/"
 
 def get_template(projName):
 

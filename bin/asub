@@ -14,6 +14,9 @@ from jbiot.subjobs.jblog import jblog
 from jbiot.subjobs.wdir import readwdir,setwdir
 from jbiot.subjobs.jbmsg import jbmsg
 from jbiot.subjobs.alisub.checkbcs import checkbcs,checkdcs
+from jbiot.subjobs.stopjobs import alistop
+import threading
+from jbiot.subjobs.deamon import deamon
 
 def asub(cmd,dry,wdir,rerun,verbose,force,email,name):
     tasks = stripcmd(cmd)
@@ -29,7 +32,6 @@ def asub(cmd,dry,wdir,rerun,verbose,force,email,name):
                 jbmsg(cmd,email,name)
                 sys.exit(1)
             jblog("go execute cause force mode is set on...")
-    jbmsg(cmd,email,name)
 
 def main(cmdfile,dryflag,email,name,wdir,rerun=False,verbose=False,force=False,timeout=-1):
     bcs =  checkbcs()
@@ -39,8 +41,18 @@ def main(cmdfile,dryflag,email,name,wdir,rerun=False,verbose=False,force=False,t
         if not wdir:
             wdir = readwdir()
         setwdir(wdir)
-        asub(cmdfile,dryflag,wdir,rerun,verbose,force,email,name) 
-
+        t = threading.Thread(target=asub,args=(cmdfile,dryflag,wdir,rerun,verbose,force,email,name))
+        t.start()
+        if timeout == -1:
+            t.join()
+            jbmsg(cmdfile,email,name)
+        else:
+            t.join(timeout)
+        if t.is_alive():
+            jblog("\033[1;31m\nJob timeout...\033[0m")
+            jbmsg(cmdfile,email,name)
+            alistop()
+            t._Thread__stop()
 
 if __name__ == "__main__":
 
@@ -56,7 +68,6 @@ if __name__ == "__main__":
         if no docker image. cmdfile will use default docker image which is jbioi/alpine-dev:latest
 
     Options:
-        -h --help                print this screen
         --dry                    all done but run script
         --rerun                  rerun the job from last failure point
         --force                  force run even error detected
@@ -65,7 +76,8 @@ if __name__ == "__main__":
         -w,--wdir=<dirname>      oss working directory
         -n,--name=<job_name>     the name of this task.
         --timeout=<timeout>      maxium seconds to run this job [default: -1]
-    """
+        -d,--deamon             run it in deamon way. also,will gene stopmyjob.sh in curdir
+     """
     args = docopt(usage)
     cmdfile = args["<cmdfile>"]
     dryflag = args["--dry"]
@@ -75,6 +87,21 @@ if __name__ == "__main__":
     verbose = args["--verbose"]
     force = args["--force"]
     rerun = args["--rerun"]
-    timeout = args["--timeout"]
-    main(cmdfile,dryflag,email,name,wdir,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
-    
+    timeout = int(args["--timeout"])
+    d = args["--deamon"]
+    if not d:
+        main(cmdfile,dryflag,email,name,wdir,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
+    else:
+        script = os.path.abspath(__file__)
+        stopfile = os.path.join(os.path.dirname(os.path.abspath(__file__)),"stopmyjob")
+        import sys
+        newargs = []
+        for item in sys.argv[1:]:
+            if item == "-d":
+                continue
+            if item == "--deamon":
+                continue
+            newargs.append(item)
+        argstr = " ".join(newargs)
+        deamon(script,argstr,cmdfile,stopfile)
+

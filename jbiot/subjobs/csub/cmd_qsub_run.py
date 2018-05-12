@@ -6,7 +6,6 @@ import time
 import sys
 
 def infocmd(cmd):
-
     sys.stderr.write(cmd + "\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
@@ -15,22 +14,20 @@ def infocmd(cmd):
     info = info1  + "\n" + info2 + "\n"
     sys.stderr.write(info)
 
-
-def getscript(script):
-    p = subprocess.Popen('which %s' % script ,shell=True,stdout=subprocess.PIPE)
-    p.wait()
-    info = p.stdout.read()
-    info = info.strip()
-    if info:
-        qsub_run = script
-    else:
-        qsub_run = "/lustre/users/kongdeju/DevWork/jbiot/bin/status_run.py"
-    return qsub_run
-
-#status_run = getscript("status_run.py")
 status_run = "/lustre/users/kongdeju/DevWork/jbiot/bin/status_run.py"
-def gen_qsub(cmdfile,mem,cpu):
+if not  os.path.exists(status_run):
+    status_run = "status_run.py"
+
+def cmd_adapt(cmdfile,mem,cpu):
     cmdid = cmdfile.split("/")[-1].split(".")[0]
+    # clean old status
+    statusfile = os.path.join(".status","%s.status" % cmdid)
+    finishfile = os.path.join(".status","%s.finished" % cmdid)
+    cmd = "rm -f %s 1>>/dev/null 2>>/dev/null" % statusfile
+    os.system(cmd)
+    cmd = "rm -f %s 1>>/dev/null 2>>/dev/null" % finishfile
+    os.system(cmd)
+
     logdir = ".log"
     taskdir = ".task"
     if not os.path.exists(logdir):
@@ -56,19 +53,16 @@ def gen_qsub(cmdfile,mem,cpu):
     fp.close()
     return qsub
 
-def check_qsub(jobid):
-    cmd = "qstat -j %s" % jobid
-    p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    p.wait()
-    stdinfo = p.stdout.read()
-    steinfo = p.stderr.read()
-    if stdinfo.find("error reason") != -1:
-        return 1 
-    if steinfo:
-        return 1
-    return   
+def cmd_check(cmdfile):
+    cid = cmdfile.split("/")[-1].split(".")[0]
+    flag = os.path.join( ".status", "%s.finished" % cid )
+    while True:
+        if os.path.exists(flag):
+            break
+    time.sleep(5)
 
-def execute_qsub(qsubfile):
+def cmd_run(qsubfile,cmdfile):
+    cid = cmdfile.split("/")[-1].split(".")[0]
     cmd = "qsub %s" % qsubfile
     sys.stderr.write(cmd+"\n")
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -78,18 +72,14 @@ def execute_qsub(qsubfile):
     sys.stderr.write(steinfo+"\n")
     sys.stderr.write(stdinfo+"\n")
     jobid = stdinfo.split()[2]
-    while True:
-        status = check_qsub(jobid)
-        if status:
-            return jobid
-        time.sleep(5)
+    cmd = "mkdir -p .jids/qsub"
+    os.system(cmd)
+    fp = open(".jids/qsub/%s"%cid,"w")
+    fp.write("%s"%jobid)
+    fp.close()
+    return jobid
 
-def status_qsub(cmdfile,jobid):
-    cmd = "qstat -j %s " % jobid
-    infocmd(cmd)
-    cmd = "qacct -j %s " % jobid
-    infocmd(cmd)
-
+def cmd_status(cmdfile):
     status = 0
     cid = cmdfile.split("/")[-1].split(".")[0]
     logfile = os.path.join(".log",cid+".log")
@@ -98,12 +88,12 @@ def status_qsub(cmdfile,jobid):
         status = 1
     return status,logfile
 
-def qsub_run(cmdfile,mem,cpu):
-    qsubfile = gen_qsub(cmdfile,mem,cpu) 
-    jobid = execute_qsub(qsubfile)
-    status,logfile = status_qsub(cmdfile,jobid)
+def main(cmdfile,mem,cpu):
+    qsubfile = cmd_adapt(cmdfile,mem,cpu) 
+    jobid = cmd_run(qsubfile,cmdfile)
+    cmd_check(cmdfile)
+    status,logfile = cmd_status(cmdfile)
     print status,logfile,jobid 
-    return status,logfile,jobid
 
 
 if __name__ == "__main__":
@@ -123,4 +113,5 @@ if __name__ == "__main__":
     cpu = args["--cpu"]
     mem = args["--mem"]
     cmdfile = args["<cmdfile>"]
-    qsub_run(cmd,cpu,mem)
+    main(cmdfile,cpu,mem)
+

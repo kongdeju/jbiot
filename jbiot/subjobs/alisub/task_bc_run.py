@@ -7,23 +7,37 @@ import sys
 from multiprocessing import Pool,Process
 import subprocess
 from ..jblog import jblog
+from ..stopjobs import alistop
 import signal
 import time
-import psutil
+import re
 
-def getscript(script):
-    p = subprocess.Popen('which %s' % script ,shell=True,stdout=subprocess.PIPE)
-    p.wait()
-    info = p.stdout.read()
-    info = info.strip()
-    if info:
-        qsub_run = script
-    else:
-        qsub_run = os.path.join(os.path.dirname(os.path.abspath(__file__)),script)
-    return qsub_run
+parent_id = os.getpid()
+pid_pat =  re.compile("\((\d+?)\)")
+def init_worker():
+    def sig_init2(signal_num,frame):
+        alistop()
+        cmd = "pstree -p %s" % parent_id
+        p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        out = p.stdout.read()
+        pids = pid_pat.findall(out)
+        pids = set(pids)
+        for pid in pids:
+            cmd = "kill -9 %s 1>>/dev/null 2>>/dev/null"  % pid
+            os.system(cmd)
+        cmd = "kill -9 %s 1>>/dev/null 2>>/dev/null" % parent_id
+        os.system(cmd)
 
-qsub_run = getscript("cmd_bc_run.py")
+        pid = os.getpid()
+        cmd = "kill -9 %s 1>>/dev/null 2>>/dev/null" % pid
+        os.system(cmd)
+        sys.exit()
+        alistop()
+    signal.signal(signal.SIGINT, sig_init2)
 
+cmd_run = "/lustre/users/kongdeju/DevWork/jbiot/jbiot/subjobs/alisub/cmd_bc_run.py"
+if not os.path.exists(cmd_run):
+    cmd_run = "cmd_bc_run.py"
 
 cmdstatus = ".status"
 def checkstatus(cid):
@@ -34,8 +48,10 @@ def checkstatus(cid):
         return 1
     return 0
 
+def run(cmdfile,cpu,mem,wdir,docker,rerun=False,verbose=False):
+    cid = cmdfile.split("/")[-1].split(".")[0]
+    cmd = open(cmdfile).read().strip("\n")
 
-def run(cid,cmd,cmdfile,cpu,mem,wdir,docker,rerun=False,verbose=False):
     info = """    exec... %s""" % cmd
     if verbose:
         info = """    exec... %s
@@ -51,13 +67,14 @@ def run(cid,cmd,cmdfile,cpu,mem,wdir,docker,rerun=False,verbose=False):
         status = "\033[1;32mpassed\033[0m"
     os.system("mkdir -p %s " % '.log')
     logfile = os.path.join(".log","%s.log"%cid)
-    qcmd = '%s %s --wdir %s --cpu %s --mem %s --docker %s ' % (qsub_run,cmdfile,wdir,cpu,mem,docker)
+    bcmd = '%s %s --wdir %s --cpu %s --mem %s --docker %s ' % (cmd_run,cmdfile,wdir,cpu,mem,docker)
     fp = open(logfile,"w")
-    line = qcmd + "\n"
+    line = bcmd + "\n"
     fp.write(line)
+    fp.close()
     jobid = None
     if not s:
-        p = subprocess.Popen(qcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        p = subprocess.Popen(bcmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         p.wait()
         stdinfo = p.stdout.read()
         steinfo = p.stderr.read()
@@ -114,20 +131,8 @@ def parsecmd(cmdfile):
         line = cmd + "\n"
         fp.write(line)
         fp.close()
-        torun.append([cid,cmd,cmdf])
+        torun.append([cmdf])
     return torun
-
-
-parent_id = os.getpid()
-def init_worker():
-    def sig_int(signal_num, frame):
-        parent = psutil.Process(parent_id)
-        for child in parent.children():
-            if child.pid != os.getpid():
-                child.kill()
-        parent.kill()
-        psutil.Process(os.getpid()).kill()
-    signal.signal(signal.SIGINT, sig_int)
 
 
 def task_run(cmdfile,cpu,mem,wdir,docker,rerun,debug):

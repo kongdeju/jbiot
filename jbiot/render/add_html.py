@@ -24,5 +24,15 @@ def add_html(html):
         img = render_html(html)
         return img
 
+    
+    if type(html) == list and checkexists(html[0]):
+        img = render_html(html[0])
+        return img
+
+    if type(html) == dict and checkexists(html.values()[0]):
+        img = render_html(html.values()[0])
+        return img
+ 
+
     return "\nno img data\n"
 

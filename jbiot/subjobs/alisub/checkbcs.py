@@ -29,16 +29,21 @@ def checkdcs():
     cmd = "ps aux | grep docker-proxy-current | grep 8864 | grep 5000"
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
-    dcs = p.stdout.read()
-    dcs = dcs.strip()
-    if dcs:
-        dcs = 1
+    lines = p.stdout.readlines()
+    for line in lines:
+        if line.find("grep") == -1:
+            dcs = 1
+            break
 
     info = """
     docker registry service needs to set.
 
-        \033[1;32mhttps://help.aliyun.com/document_detail/28022.html?spm=a2c4g.11186623.6.572.4kpHYv\033[0m
- 
+        \033[1;32mhttps://help.aliyun.com/document_detail/28022.html?spm=a2c4g.11186623.6.572.4kpHYv
+
+                                            or 
+
+                        use dcs-start to start ali docker service\033[0m
+         
     """
 
     if not dcs:
@@ -48,4 +53,5 @@ def checkdcs():
 
 
 
-
+if __name__ == "__main__":
+    checkdcs()

@@ -25,7 +25,7 @@ def handlesing(simg):
     if os.path.exists(simgPath):
         return simgPath
     print "download...%s" % simg 
-    simghttp = "http://www.genescret.com:6636/dev-env/singularity/%s" % simg
+    simghttp = "http://www.jbio.cc:6636/dev-env/singularity/%s" % simg
     cmd = "wget -P %s %s" % (sdir,simghttp)
     print "\t%s" % cmd
     p = subprocess.Popen(cmd,shell=True)

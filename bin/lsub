@@ -13,6 +13,11 @@ from jbiot.subjobs.lsub import lsub_run
 from jbiot.subjobs.jblog import jblog
 from jbiot.subjobs.jbmsg import jbmsg
 import threading
+from jbiot.subjobs.stopjobs import Lstop as lstop
+import subprocess
+from jbiot.subjobs.deamon import deamon
+from jbiot.subjobs.mainid import mainid
+import signal
 
 def lsub(cmd,dry,rerun,verbose,force,email,name):
     tasks = stripcmd(cmd)
@@ -28,10 +33,11 @@ def lsub(cmd,dry,rerun,verbose,force,email,name):
                 jbmsg(cmd,email,name)
                 sys.exit(1)
             jblog("\033[1;31mgo execute cause force mode is set on...\033[0m")
-    jbmsg(cmd,email,name)
+
 
 
 def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=False,force=False,timeout=-1):
+    mainid()
     cmdfile = ossfy(cmdfile)
     if docker :
         cmdfile = dockersing(cmdfile,prefer="docker")
@@ -42,11 +48,15 @@ def main(cmdfile,dryflag,email,name,docker=False,sing=False,rerun=False,verbose=
     t.start()
     if timeout == -1:
         t.join()
+        jbmsg(cmdfile,email,name)
     else:
         t.join(timeout)
     if t.is_alive():
         jblog("\033[1;31m\nJob timeout...\033[0m")    
+        jbmsg(cmdfile,email,name)
+        lstop(os.getpid())
         t._Thread__stop()
+
 
 if __name__ == "__main__":
 
@@ -68,9 +78,9 @@ if __name__ == "__main__":
         --with-docker            prefer to use docker when run cmd
         --with-singularity       prefer to user singularity when run cmd
         -e,--email=<email>       email of you want to remind of
-        -w,--wechat=<name>       wechat name you want to send to
         -n,--name=<job_name>     the name of this task.
         --timeout=<timeout>      maxium seconds to run this job [default: -1]
+        -d,--deamon             run it in deamon way. also,will gene stopmyjob.sh in curdir
     """
     args = docopt(usage)
     cmdfile = args["<cmdfile>"]
@@ -78,11 +88,25 @@ if __name__ == "__main__":
     docker = args["--with-docker"]
     sing = args["--with-singularity"]
     email = args["--email"]
-    wechat = args["--wechat"]
     name = args["--name"]
     verbose = args["--verbose"]
     force = args["--force"]
     rerun = args["--rerun"]
     timeout = int(args["--timeout"])
-    main(cmdfile,dryflag,email,name,docker=docker,sing=sing,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
-    
+    d = args["--deamon"]
+    if not d:
+        main(cmdfile,dryflag,email,name,docker=docker,sing=sing,rerun=rerun,verbose=verbose,force=force,timeout=timeout)
+    else:
+        script = os.path.abspath(__file__)
+        stopfile = os.path.join(os.path.dirname(os.path.abspath(__file__)),"stopmyjob")
+        import sys
+        newargs = []
+        for item in sys.argv[1:]:
+            if item == "-d":
+                continue
+            if item == "--deamon":
+                continue
+            newargs.append(item)
+        argstr = " ".join(newargs)
+        deamon(script,argstr,cmdfile,stopfile)
+

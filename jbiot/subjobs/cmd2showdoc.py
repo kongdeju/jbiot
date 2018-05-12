@@ -8,6 +8,7 @@ import json
 import os
 import getpass
 import time
+host = "http://jbio.cc:5525/"
 
 def cmd2showdoc(pageName,cmdFile):
     user = getpass.getuser()
@@ -30,9 +31,7 @@ def cmd2showdoc(pageName,cmdFile):
         "cat_name": "项目工作",
         "cat_name_sub" : "操作命令"
     }
-    url = "http://www.genescret.com:5525/server/index.php?s=/api/item/updateByApi"
+    url = host + "/server/index.php?s=/api/item/updateByApi"
     #url = "http://www.genescret.com:5525/server/api/item/updateByApi"
     req = requests.post(url,data=data)
-
-
 
