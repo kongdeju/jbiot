@@ -10,7 +10,6 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 dirpath = os.path.dirname(os.path.abspath(__file__))
 macro = os.path.join(dirpath,"func.macro")
-from PIL import Image
 import yaml
 from add_text import add_text
 from add_xls import add_xls
