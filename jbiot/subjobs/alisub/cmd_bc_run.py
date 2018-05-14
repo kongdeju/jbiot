@@ -237,19 +237,17 @@ def gen_bc(cmdid,execcmd,wdir):
 #gen_bc("abc",'bwa mem -t 4 -R "RG\\tiullid" reference oss://jbiobio/fq1 fq2')
 #gen_bc("abc",'bwa mem -t 4 -R "RG\\tiullid" reference oss://jbiobio/fq1 fq2;I=oss://bio/tmp/hg19.fq,fai;O=test.bam')
 
-def finish_bc(jobid):
+def finish_bc(wdir,cid,jobid):
     
-    status = 1
-    cmd = "bcs check %s" % jobid
+    status = 0
+    finishfile = cid + ".finished"
+    lcf = os.path.join(".status",finishfile)
+    finishfile = os.path.join(wdir + lcf)
+    cmd = "oss2tools download %s %s " % ( finishfile,lcf )
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     p.wait()
-    info = p.stdout.read()
-    lines = info.split("\n")
-    for line in lines:
-        if line.startswith("JobName"):
-            stat = line.split()[-1]
-            if stat == "(Waiting)" or stat == "(Running)":
-                status = 0
+    if os.path.join(lcf):
+        status = 1
     return status
 
 def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
@@ -265,7 +263,7 @@ def execute_bc(wdir,cmdfile,docker="jbioi/alpine-dev",cpu=1,mem="2G"):
     jobid = None
     dockerstr = ""
     if docker:
-        cmd = "docker run --rm %s echo " % docker
+        cmd = "docker run --rm %s echo prepare image" % docker
         info = infocmd(cmd)
         cmd = "docker tag %s localhost:8864/%s" % (docker,docker)
         info = infocmd(cmd)
