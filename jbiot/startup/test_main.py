@@ -6,6 +6,5 @@ def test_main():
     os.system(cmd)
 
 
-
 if __name__ == "__main__":
     test_main()

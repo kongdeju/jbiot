@@ -8,22 +8,13 @@ from jbiot import log
 from jbiot import yamladd
 import yaml
 
-def arrange(params):
-    """ {{projName}} arrange output files
-
-    Args:
-        params: indict , key is `yaml`, value in yaml file::
-
-            "xx": path of xx.
-
-    Returns:
-        dict : key is `yaml`, value is path of yaml file
+def arrange(ymlfile):
+    """ {{projName}} arrange output files use log.run
 
     """
 
     # handle input
-    yamlin = params["yaml"]
-    indict = yaml.load(open(yamlin).read())
+    indict = yaml.load(open(ymlfile).read())
  
     # process cmd and user log.move to arrange files to report
     pass
@@ -32,10 +23,6 @@ def arrange(params):
 
     #handle out
     outdict = {}
-    yamlout = yamladd(yamlin,outdict)
-    return yamlout
-
-class {{projName}}Arranger(jbiotWorker):
-    def handle_task(self,key,params):
-        self.execMyfunc(arrange,params)
+    yamladd(ymlfile,outdict)
+    return ymlfile
 

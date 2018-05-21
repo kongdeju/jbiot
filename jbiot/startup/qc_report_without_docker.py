@@ -5,31 +5,21 @@ dirpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"../")
 sys.path.insert(0,dirpath)
 from {{projName}}.arranger.arrange import arrange
 from {{projName}}.reporter.report import report 
-import yaml
-from jbiot import jbiotWorker
 
 # entrypoint function
-def {{projName}}(params):
+def {{projName}}(ymlfile):
 
     # call apps
 
-    arrange(params)
-    report(params)
+    arrange(ymlfile)
+    report(ymlfile)
     
-    return params
-
-# mulit-omics platform
-class {{projName}}Worker(jbiotWorker):
-    def handle_task(self,key,params):
-        self.execute({{projName}},params)
+    return ymlfile
 
 
-# main function
-def main(yml):
-    #1. read yaml 
-    params = {}
-    params["yaml"] = yml
-    {{projName}}(params)
+def main():
+    
+
 
 if __name__ == "__main__":
     from docopt import docopt
@@ -39,7 +29,7 @@ if __name__ == "__main__":
 
     Options:
         -c,--conf <params>    params in yaml format.
-
+        -e,--exec <method>    method default is off. and can be set one of [sh|lsub|csub|asub]
     """
     args = docopt(usage)
     yml = args["--conf"]

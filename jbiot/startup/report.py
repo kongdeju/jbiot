@@ -12,19 +12,12 @@ from jbiot import yamladd
 import yaml
 import json
 
-def report(params):
+def report(ymlfile):
     """ {{projName}} to markdown file and html file
 
-    Args: report input dict, key is `yaml`, value is yaml file path::
-
-            "xx": path of xx.
-
-    Returns:
-        dict : key is `yaml`,value is yaml file path
     """
     # handle input
-    yamlin = params["yaml"]
-    indict = yaml.load(open(yamlin))
+    indict = yaml.load(open(ymlfile))
 
     render_yml = "{{projName}}_render.yml"
     cmd = "echo '%s' > %s" % (json.dumps(indict),render_yml)
@@ -41,9 +34,5 @@ def report(params):
     outdict["{{projName}}"] = out
     yamlout = yamladd(yamlin,outdict)
     yamlout["{{projName}}_outdir"] = os.getcwd()
-    return yamlout
-
-class reportWorker(jbiotWorker):
-    def handle_task(self,key,params):
-        self.execMyfunc(report,params)
+    return ymlfile
 

@@ -44,8 +44,9 @@ def cmd_adapt(cmdfile,mem,cpu):
 #$ -N %s
 #$ -o %s
 #$ -e %s
+#$ -l h_vmem=%s,cpu=%s
 %s %s
-        """ % (jobname,log,log,status_run,cmdid)
+        """ % (jobname,log,log,mem,cpu,status_run,cmdid)
     qsub =  cmdid + ".qsub"
     qsub = os.path.join(taskdir,qsub)
     fp = open(qsub,"w")
@@ -105,8 +106,8 @@ if __name__ == "__main__":
         cmd_qsub_run.py [options] <cmdfile> 
 
     Options:
-        --cpu=<cpu>        cpu nums want to use [default: 1]
-        --mem=<mem>        memory want to use [default: 2G]
+        --cpu=<cpu>        cpu nums want to use [default: 4]
+        --mem=<mem>        memory want to use [default: 8G]
 
     """
     args = docopt(usage)

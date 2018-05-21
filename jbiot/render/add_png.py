@@ -1,6 +1,7 @@
 import xlrd
 import os
 from base64 import b64encode
+from PIL import Image
 
 def b64(afile):
     fp = open(afile)
@@ -27,9 +28,9 @@ def getimgsize(image):
     return (w,h)
 
 def render_png(png):
-    #w,h = getimgsize(png)
+    w,h = getimgsize(png)
     raw = b64(png)
-    cont = '\n<center><img src="data:image/png;base64,%s" ></center>\n' % (raw)
+    cont = '\n<center><img src="data:image/png;base64,%s" width=%s height=%s></center>\n' % (raw,w,h)
     return cont
 
 def add_png(png):

@@ -10,12 +10,14 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 dirpath = os.path.dirname(os.path.abspath(__file__))
 macro = os.path.join(dirpath,"func.macro")
+from PIL import Image
 import yaml
 from add_text import add_text
 from add_xls import add_xls
 from add_png import add_png
 from add_png import getName
 from add_png import b64 as baseimg
+from add_png import getimgsize
 from add_pdf import pdfs2pngs 
 from add_pdf import add_pdf
 from add_pngs import handle_pngs
@@ -32,6 +34,7 @@ def render(tpl,ijson,out,yml):
     temp.globals["add_xls"] = add_xls
     temp.globals["add_png"] = add_png
     temp.globals["baseimg"] = baseimg
+    temp.globals["getimgsize"] = getimgsize
     temp.globals["getName"] = getName
     temp.globals["pdfs2pngs"] = pdfs2pngs
     temp.globals["add_pdf"] = add_pdf

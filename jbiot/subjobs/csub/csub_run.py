@@ -73,7 +73,7 @@ def run(cmdfile,mem,cpu,rerun,verbose):
     logfile = os.path.join(".log","%s.log"%cid)
     os.system("mkdir -p .log")
     fp = open(logfile,"w")
-    qcmd = '%s %s ' % (cmd_run,cmdfile)
+    qcmd = '%s %s --mem %s --cpu %s' % (cmd_run,mem,cpu,cmdfile)
     fp.write(qcmd+"\n\n")
     fp.close()
     if not s:

@@ -319,7 +319,7 @@ def cmd_run(cmdid,cmd,wdir,cpu,mem,docker):
     execute_lc(localcmdfile)
     jobid = execute_bc(wdir,bccmdfile,docker,cpu,mem)
     while True:
-        finish = finish_bc(jobid)
+        finish = finish_bc(wdir,cmdid,jobid)
         if finish:
             break
         time.sleep(10)

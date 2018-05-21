@@ -4,10 +4,10 @@ sys.path.append("../")
 
 from {{projName}}.reporter.report import report
 
-indict = {"yaml":"data/report.yml"}
+ymlfile:"data/report.yml"}
 
 def test_report():
-    report(indict)
+    report(ymlfile)
 
 
 if __name__ == "__main__":

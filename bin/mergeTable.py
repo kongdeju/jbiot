@@ -7,12 +7,19 @@ def getsamecols(tabs,sep=" "):
         fp = open(tab)
         headline = fp.readline()
         items = headline.strip().split(sep)
-        heads.append(set(items))
+        heads.append(items)
     samecols = heads[0]
     for i in range(1,len(heads)):
-        samecols = samecols & heads[i] 
-    return samecols
-
+        samecols = set(samecols) & set(heads[i])
+    
+    cols = []
+    for col in samecols:
+        idx = heads[0].index(col)
+        cols.append([col,idx])
+    cols = sorted(cols,key=lambda x: x[1])
+    
+    cols = [ item[0] for item in cols]    
+    return cols
 
 def getallcols(tabs,sep):
     totalcols = []

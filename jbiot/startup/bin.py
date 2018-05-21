@@ -7,7 +7,6 @@ dirname = os.path.join(dirname,"../")
 sys.path.insert(0,dirname)
 from {{projName}}.arranger.arrange import arrange
 from {{projName}}.reporter.report import report
-from jbiot import jbiotWorker
 import yaml
 
 def {{projName}}(indict):
@@ -21,10 +20,6 @@ def {{projName}}(indict):
     """ 
     outdict = {}
     return outdict
-
-class qcWorker(jbiotWorker):
-    def handle_task(self,key,params):
-        self.execMyfunc({{projName}},params)
 
 def main(yml):
     fp = open(yml)

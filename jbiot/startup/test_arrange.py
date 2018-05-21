@@ -4,10 +4,10 @@ sys.path.append("../")
 
 from {{projName}}.arranger.arrange import arrange
 
-indict = {"yaml":"data/arrange.yml"}
+ymlfile = "data/arrange.yml"
 
 def test_arrange():
-    arrange(indict)
+    arrange(ymlfile)
 
 
 

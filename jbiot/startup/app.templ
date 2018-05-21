@@ -1,4 +1,6 @@
-
+#!/usr/bin/env python
+#coding=utf-8
+sdir = os.path.dirname(os.path.abspath(__file__))
 try:
     import config 
 except Exception,e:
@@ -10,45 +12,51 @@ from jbiot import yamladd
 from jbiot import jbiotWorker
 import yaml
 
-sdir = os.path.dirname(os.path.abspath(__file__))
 
-
-def {{appName}}(params):
+def {{appName}}(ymlfile):
     """introduction to {{appName}}
     
     Args:
-        params: input dict, key is `yaml`, value is yaml file, fowllowing key needed:
+        params: input yaml file , fowllowing key needed and key starts with * mean must args::
             
-            key1 : value1
-
+            *key1 : value1
+            key2 : value2 
 
     Returns:
-        dict : output dict ,of which key is `yaml`, value is yaml file,following key added::
+        dict : output yamlfile  following key will be added to yaml file::
 
             key1 : value1
     """
 
     # handle input
-    ymlin = params["yaml"]
-    indict = yaml.load(open(ymlin).read())
-
+    indict = yaml.load(open(ymlfile).read())
 
 
     # process cmd
 
 
-
     # handle output
     outdict = {}
     
-    outdict = yamladd(ymlin,outdict)
-    return outdict
+    yamladd(ymlfile,outdict)
+    return ymlfile
 
 
-# for omics platform
-class {{appName}}Worker(jbiotWorker):
-    def handle_task(self,key,params):
-        self.execMyfunc({{appName}},params)
+if __name__ == "__main__":
+    import docopt
+    usage = """
+    Usage:
+        {{appName}}.py -c <conf>
+    
+    Options:
+        -c,--conf <conf>    input yamlfile
+
+    """
+    args = docopt(usage)
+    yamlfile = args["--conf"] 
+    {{appName}}(yamlfile)   
+
+
 
 
 
