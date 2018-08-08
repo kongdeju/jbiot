@@ -14,3 +14,4 @@ oss2
 #wechat_sender
 #pytest-cov
 #codecov
+pyscaffold==2.5
