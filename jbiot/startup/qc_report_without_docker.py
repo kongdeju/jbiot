@@ -7,7 +7,7 @@ from {{projName}}.arranger.arrange import arrange
 from {{projName}}.reporter.report import report 
 
 # entrypoint function
-def {{projName}}(ymlfile):
+def main(ymlfile):
 
     # call apps
 
@@ -17,7 +17,6 @@ def {{projName}}(ymlfile):
     return ymlfile
 
 
-def main():
     
 
 
